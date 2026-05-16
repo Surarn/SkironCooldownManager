@@ -3,6 +3,7 @@ local addonName, SCM = ...
 local AceGUI = LibStub("AceGUI-3.0")
 local LibEditModeOverride = LibStub("LibEditModeOverride-1.0")
 local LibCustomGlow = LibStub("LibCustomGlow-1.0")
+local LibWindow = LibStub("LibWindow-1.1")
 local Utils = SCM.Utils
 local ToGlobalGroup = Utils.ToGlobalGroup
 local ToBuffBarGroup = Utils.ToBuffBarGroup
@@ -438,6 +439,8 @@ local function OpenOptions()
 	SCM.isOptionsOpen = true
 	SCM.simulateBuffs = true
 
+	local options = SCM.db.profile.options
+
 	SCM:StopAllGlows()
 	SCM:ApplyAllCDManagerConfigs()
 
@@ -445,6 +448,12 @@ local function OpenOptions()
 	frame:SetTitle(addonName)
 	frame:SetLayout("flow")
 	SCM.OptionsFrame = frame
+
+	LibWindow.RegisterConfig(frame.frame, options.optionsWindow)
+	
+	if options.savePosition then
+		LibWindow.RestorePosition(frame.frame)
+	end
 
 	frame:SetHeight(1000)
 	frame:SetWidth(800)
@@ -505,6 +514,10 @@ local function OpenOptions()
 		RunNextFrame(function()
 			SCM:RestoreBlizzardGlows()
 		end)
+
+		if options.savePosition then
+			LibWindow.SavePosition(frame.frame)
+		end
 	end)
 
 	if SCM.db.profile.options.showAnchorHighlight then

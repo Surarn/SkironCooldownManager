@@ -200,11 +200,11 @@ local function SelectGlobalSettingsTab(tabWidget, group, options)
 		local skinningSettings = AceGUI:Create("InlineGroup")
 		skinningSettings:SetLayout("flow")
 		skinningSettings:SetFullWidth(true)
-		skinningSettings:SetTitle("Skinning")
+		skinningSettings:SetTitle("General")
 		tabWidget:AddChild(skinningSettings)
 
 		local enableSkinning = AceGUI:Create("CheckBox")
-		enableSkinning:SetRelativeWidth(0.5)
+		enableSkinning:SetRelativeWidth(0.33)
 		enableSkinning:SetLabel("Enable Skinning")
 		enableSkinning:SetValue(options.enableSkinning)
 		enableSkinning:SetCallback("OnValueChanged", function(_, _, value)
@@ -214,7 +214,7 @@ local function SelectGlobalSettingsTab(tabWidget, group, options)
 
 		local showAnchorHighlight = AceGUI:Create("CheckBox")
 		showAnchorHighlight:SetValue(options.showAnchorHighlight)
-		showAnchorHighlight:SetRelativeWidth(0.5)
+		showAnchorHighlight:SetRelativeWidth(0.33)
 		showAnchorHighlight:SetLabel("Show Anchor Highlight")
 		showAnchorHighlight:SetCallback("OnValueChanged", function(self, event, value)
 			options.showAnchorHighlight = value
@@ -232,6 +232,15 @@ local function SelectGlobalSettingsTab(tabWidget, group, options)
 			end
 		end)
 		skinningSettings:AddChild(showAnchorHighlight)
+
+		local savePosition = AceGUI:Create("CheckBox")
+		savePosition:SetRelativeWidth(0.33)
+		savePosition:SetLabel("Save Option Position")
+		savePosition:SetValue(options.savePosition)
+		savePosition:SetCallback("OnValueChanged", function(_, _, value)
+			options.savePosition = value
+		end)
+		skinningSettings:AddChild(savePosition)
 
 		local visibilitySettings = AceGUI:Create("InlineGroup")
 		visibilitySettings:SetLayout("flow")
@@ -822,7 +831,6 @@ local function SelectGlobalSettingsTab(tabWidget, group, options)
 				cooldownTimerTestResult:SetText("Output: (Invalid Input)")
 			end
 		end)
-
 	elseif group == "Glow" then
 		local glowSettings = AceGUI:Create("InlineGroup")
 		glowSettings:SetLayout("flow")

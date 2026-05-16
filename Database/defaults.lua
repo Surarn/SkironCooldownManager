@@ -94,6 +94,7 @@ SCM.DefaultDB = {
 			useCustomVisibilityCondition = false,
 			customVisibilityCondition = "",
 			debug = false,
+			savePosition = false,
 			enableSkinning = true,
 			enableCustomIcons = true,
 			simulateAuras = true,
@@ -164,6 +165,7 @@ SCM.DefaultDB = {
 				"PrimaryResourceBar",
 				"SecondaryResourceBar",
 			},
+			optionsWindow = {},
 			resourceBar = {
 				enabled = true,
 				hideWhileMounted = false,
