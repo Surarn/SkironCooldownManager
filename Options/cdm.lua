@@ -1608,6 +1608,18 @@ local function SelectAnchor(widget, parentWidget, anchorIndex, anchorTabsTbl, mo
 										ApplyIconConfigUpdate()
 									end)
 									iconSettingsTabs:AddChild(glowWhileActive)
+
+									local glowWhileInactive = AceGUI:Create("CheckBox")
+									glowWhileInactive:SetLabel("Glow While Inactive")
+									glowWhileInactive:SetRelativeWidth(0.5)
+									glowWhileInactive:SetValue(buttonConfig.glowWhileInactive)
+									glowWhileInactive:SetDisabled(not options.useCustomGlow)
+									SCM.Utils.SetDisabledTooltip(glowWhileInactive, "Enable 'Use Custom Glow' in Global Settings > Glow first.")
+									glowWhileInactive:SetCallback("OnValueChanged", function(self, event, value)
+										buttonConfig.glowWhileInactive = value or nil
+										ApplyIconConfigUpdate()
+									end)
+									iconSettingsTabs:AddChild(glowWhileInactive)
 								end
 							elseif group == "state" then
 								CreateStateDropdown(self, iconSettings, scrollFrame, options, buttonConfig)

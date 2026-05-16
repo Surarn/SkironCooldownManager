@@ -123,6 +123,17 @@ function Icons.UpdateChildGlow(child, isInactive)
 			if child.SCMGlow then
 				SCM:StopCustomGlow(child)
 			end
+		elseif child.SCMConfig.glowWhileInactive then
+			if isInactive then
+				SCM:StartCustomGlow(child)
+				return
+			end
+
+			if child.SCMGlow then
+				SCM:StopCustomGlow(child)
+			end
+		elseif child.SCMGlow then
+			SCM:StopCustomGlow(child)
 		end
 	end
 end
@@ -272,6 +283,7 @@ local function ProcessBuffIcon(child, childData, options)
 
 	Icons.SetChildVisibilityState(child, true, true)
 	Icons.UpdateChildDesaturation(child, isInactive)
+	Icons.UpdateChildGlow(child, isInactive)
 end
 
 local function ProcessRegularIcon(child, childData, options)

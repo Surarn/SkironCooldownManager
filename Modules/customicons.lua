@@ -243,6 +243,11 @@ local function UpdateCustomIconGlow(frame, isActive)
 			frame.SCMGlowWhileActive = true
 			SCM:StartCustomGlow(frame)
 		end
+	elseif frame.SCMConfig.glowWhileInactive and not isActive then
+		if not frame.SCMGlowWhileActive then
+			frame.SCMGlowWhileActive = true
+			SCM:StartCustomGlow(frame)
+		end
 	elseif frame.SCMGlowWhileActive then
 		frame.SCMGlowWhileActive = nil
 		SCM:StopCustomGlow(frame)
