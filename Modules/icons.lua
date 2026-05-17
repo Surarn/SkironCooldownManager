@@ -132,8 +132,6 @@ function Icons.UpdateChildGlow(child, isInactive)
 			if child.SCMGlow then
 				SCM:StopCustomGlow(child)
 			end
-		elseif child.SCMGlow then
-			SCM:StopCustomGlow(child)
 		end
 	end
 end
