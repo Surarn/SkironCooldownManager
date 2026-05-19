@@ -156,18 +156,16 @@ function Cooldowns.SetNormalCooldown(self, parent)
 	local durationObject
 	local desaturate = false
 
-	if cooldownData.charges then
+	local spellCooldown = C_Spell.GetSpellCooldown(parent.SCMSpellID)
+	if spellCooldown and spellCooldown.isActive and not spellCooldown.isOnGCD then
+		desaturate = true
+		durationObject = C_Spell.GetSpellCooldownDuration(parent.SCMSpellID, true)
+	end
+
+	if cooldownData.charges and not durationObject then
 		local spellCharges = C_Spell.GetSpellCharges(parent.SCMSpellID)
 		if spellCharges and spellCharges.isActive and not spellCharges.isOnGCD then
 			durationObject = C_Spell.GetSpellChargeDuration(parent.SCMSpellID, true)
-		end
-	end
-
-	if not durationObject then
-		local spellCooldown = C_Spell.GetSpellCooldown(parent.SCMSpellID)
-		if spellCooldown and spellCooldown.isActive and not spellCooldown.isOnGCD then
-			desaturate = true
-			durationObject = C_Spell.GetSpellCooldownDuration(parent.SCMSpellID, true)
 		end
 	end
 
