@@ -1484,7 +1484,7 @@ local function SelectAnchor(widget, parentWidget, anchorIndex, anchorTabsTbl, mo
 								if buttonData.isCustom and (buttonData.iconType == "spell" or buttonData.iconType == "timer") then
 									local castTimer = AceGUI:Create("Slider")
 									castTimer:SetRelativeWidth(0.5)
-									castTimer:SetSliderValues(0, 30, 0.1)
+									castTimer:SetSliderValues(0, 60, 0.1)
 									castTimer:SetLabel("Timer Duration")
 									castTimer:SetValue(buttonConfig.duration or 0)
 									castTimer:SetCallback("OnValueChanged", function(_, _, value)
