@@ -546,7 +546,8 @@ Constants.TargetAuras = {
 
 -- Blizzard randomly clears those cooldowns and I have to fix it. Fun :)
 Constants.FixBlizzardSpells = {
-	[202137] = true,
-	[204596] = true,
-	[207684] = true,
+	[202137] = true, -- Sigil of Silence
+	[204596] = true, -- Sigil of Flame
+	[207684] = true, -- Sigil or Misery
+	[325153] = true, -- Exploding Keg
 }

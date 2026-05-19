@@ -229,7 +229,6 @@ local function OnRegularCooldownChanged(self, changeType)
 	end
 
 	local options = SCM.db.profile.options
-
 	if options.disableRegularIconActiveSwipe and not parent.SCMConfig.forceActiveSwipe and self:GetUseAuraDisplayTime() then
 		Cooldowns.OverrideRegularAuraCooldown(self, parent, options)
 	elseif options.disableGCD or (changeType == "CLEAR" and Constants.FixBlizzardSpells[parent.SCMSpellID]) then
