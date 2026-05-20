@@ -457,7 +457,9 @@ local function DoesItemOrSpellExists(config)
 	end
 
 	if iconType == "slot" then
-		if config.slotID then
+		if config.alwaysShow then
+			return true
+		elseif config.slotID then
 			local itemID = GetInventoryItemID("player", config.slotID)
 			if itemID then
 				return C_Item.DoesItemExistByID(itemID) and C_Item.GetItemSpell(itemID)
