@@ -39,6 +39,7 @@ local function ResetCustomIconFrame(_, frame)
 	frame.SCMReleased = true
 	frame.SCMFrameRegistry = nil
 	frame.SCMFrameID = nil
+	frame.SCMSkinned = nil
 	frame.spellID = nil
 	frame.SCMItemID = nil
 	frame.slotID = nil
@@ -395,7 +396,7 @@ local function UpdateCustomIconCooldown(frame, iconType, config)
 
 			local globalCooldown = C_Spell.GetSpellCooldown(61304)
 			frame.Icon:SetDesaturated(not (duration == globalCooldown.duration))
-			
+
 			UpdateCustomIconGCD(frame, config, true)
 			UpdateCustomIconGlow(frame, false)
 			return true

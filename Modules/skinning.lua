@@ -225,7 +225,7 @@ function SCM:SkinChild(child, childConfig)
 		child.Cooldown:ClearAllPoints()
 		child.Cooldown:SetAllPoints(child)
 
-		child.customBorder = CreateFrame("Frame", nil, child, "BackdropTemplate")
+		child.customBorder = child.customBorder or CreateFrame("Frame", nil, child, "BackdropTemplate")
 		child.customBorder:SetFrameLevel(child:GetFrameLevel() + 1)
 		child.customBorder:SetAllPoints(child)
 		child.customBorder:SetBackdrop({
