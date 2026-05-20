@@ -13,7 +13,7 @@ local function CreateCustomConfigTables(customConfig)
 	customConfig.slotConfig = GetOrCreateTableEntry(customConfig, "slotConfig")
 	customConfig.timerConfig = GetOrCreateTableEntry(customConfig, "timerConfig")
 
-	local allowedKeys = SCM.DefaultDB.global.globalCustomConfig
+	local allowedKeys = SCM.DefaultDB.profile.globalCustomConfig
 	for key in pairs(customConfig) do
 		if not allowedKeys[key] then
 			customConfig[key] = nil
@@ -139,6 +139,8 @@ local function CreateResourceBarConfig(resourceBarConfig, specResourceBarConfig,
 end
 
 function SCM:UpdateDB()
+	self:MigrateLegacyGlobalConfigToProfiles()
+
 	local options = self.db.profile.options
 	if not options.cooldownBreakpoints or #options.cooldownBreakpoints == 0 then
 		options.cooldownBreakpoints = CopyTable(self.Constants.CooldownTimer.DefaultBreakpoints)
@@ -184,8 +186,8 @@ function SCM:UpdateDB()
 	self.currentConfig.buffBarsAnchorConfig = self.currentConfig.buffBarsAnchorConfig or {}
 	self.buffBarsAnchorConfig = CreateAnchorConfigTables(self.currentConfig.buffBarsAnchorConfig)
 
-	self.globalAnchorConfig = self.db.global.globalAnchorConfig
-	self.globalCustomConfig = CreateCustomConfigTables(self.db.global.globalCustomConfig)
+	self.globalAnchorConfig = self.db.profile.globalAnchorConfig
+	self.globalCustomConfig = CreateCustomConfigTables(self.db.profile.globalCustomConfig)
 	self:RemoveOldAnchorConfigs(self.currentConfig, self.globalAnchorConfig, self.globalCustomConfig)
 
 	self.isHideWhenInactiveEnabled = self:GetHideWhenInactive() == 1

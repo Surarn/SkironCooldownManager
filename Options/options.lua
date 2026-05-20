@@ -49,7 +49,7 @@ function SCM.Decode(importString)
 end
 
 function SCM:AddGlobalAnchor(anchorTabsTbl)
-	local anchorConfig = self.db.global.globalAnchorConfig
+	local anchorConfig = self.db.profile.globalAnchorConfig
 	local nextIndex = #anchorConfig + 1
 	anchorConfig[nextIndex] = {
 		anchor = { "CENTER", "UIParent", "CENTER", 0, 0 },
@@ -101,8 +101,8 @@ local function RemoveDeletedAnchorCustomConfig(configTable, anchorIndex)
 end
 
 function SCM:RemoveGlobalAnchor(anchorIndex, anchorTabsTbl)
-	if self.db.global.globalAnchorConfig[anchorIndex] then
-		tremove(self.db.global.globalAnchorConfig, anchorIndex)
+	if self.db.profile.globalAnchorConfig[anchorIndex] then
+		tremove(self.db.profile.globalAnchorConfig, anchorIndex)
 	end
 
 	local globalAnchorIndex = ToGlobalGroup(#anchorTabsTbl)
@@ -110,10 +110,10 @@ function SCM:RemoveGlobalAnchor(anchorIndex, anchorTabsTbl)
 	self.anchorFrames[globalAnchorIndex] = nil
 
 	for _, globalConfig in pairs({
-		self.db.global.globalCustomConfig.spellConfig,
-		self.db.global.globalCustomConfig.itemConfig,
-		self.db.global.globalCustomConfig.slotConfig,
-		self.db.global.globalCustomConfig.timerConfig,
+		self.db.profile.globalCustomConfig.spellConfig,
+		self.db.profile.globalCustomConfig.itemConfig,
+		self.db.profile.globalCustomConfig.slotConfig,
+		self.db.profile.globalCustomConfig.timerConfig,
 	}) do
 		RemoveDeletedAnchorCustomConfig(globalConfig, anchorIndex)
 	end

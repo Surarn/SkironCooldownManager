@@ -53,7 +53,7 @@ SCM.DB = {
 }
 
 SCM.DefaultDB = {
-	global = {
+	profile = {
 		globalAnchorConfig = {
 			[1] = {
 				anchor = { "CENTER", "UIParent", "CENTER", 0, -360 },
@@ -71,8 +71,6 @@ SCM.DefaultDB = {
 			slotConfig = {},
 			timerConfig = {},
 		},
-	},
-	profile = {
 		options = {
 			anchorUUFRoles = {
 				["HEALER"] = false,
