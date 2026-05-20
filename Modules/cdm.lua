@@ -184,7 +184,7 @@ local function UpdateAnchorLinks(config)
 	return anchorLinks
 end
 
-local function LayoutAnchorGroup(group, visibleChildren, anchorConfig, options, changedGroups, resetSize, checkDuplicates)
+local function LayoutAnchorGroup(group, visibleChildren, anchorConfig, options, changedGroups, resetSize, checkDuplicates, allowLayoutSkip)
 	local state = GetAnchorState(group)
 	local rowConfig = (anchorConfig and anchorConfig.rowConfig and #anchorConfig.rowConfig > 0) and anchorConfig.rowConfig or DEFAULT_ROW_CONFIG
 	local lastRowConfig = rowConfig[#rowConfig]
@@ -215,8 +215,22 @@ local function LayoutAnchorGroup(group, visibleChildren, anchorConfig, options, 
 	local layoutChildCount
 	local uniqueChildren
 	local visibleChildCount = #visibleChildren
+	local configuredChildCount = configuredChildren and #configuredChildren or 0
+	local layoutSignature = visibleChildCount
 
 	table.sort(visibleChildren, SortBySCMOrder)
+	for index = 1, visibleChildCount do
+		local child = visibleChildren[index]
+		local cooldownID = child.SCMCooldownID
+		local cooldownSignature = tonumber(cooldownID) or 0
+		if cooldownSignature == 0 and cooldownID then
+			cooldownID = tostring(cooldownID)
+			for byteIndex = 1, #cooldownID do
+				cooldownSignature = cooldownSignature + (cooldownID:byte(byteIndex) * byteIndex)
+			end
+		end
+		layoutSignature = layoutSignature + (cooldownSignature * index) + ((child.SCMOrder or 0) * 17)
+	end
 
 	if isFixed or lockGroupSize then
 		layoutChildren = configuredChildren or visibleChildren
@@ -229,6 +243,18 @@ local function LayoutAnchorGroup(group, visibleChildren, anchorConfig, options, 
 
 	layoutChildCount = #layoutChildren
 	totalChildren = layoutChildCount
+	layoutSignature = layoutSignature + (configuredChildCount * 31) + (layoutChildCount * 131)
+
+	if allowLayoutSkip
+		and not checkDuplicates
+		and not resetSize
+		and not SCM.isOptionsOpen
+		and state.layoutSignature == layoutSignature
+	then
+		return
+	end
+
+	state.layoutSignature = layoutSignature
 
 	if checkDuplicates then
 		uniqueChildren = Cache.cachedLayoutChildren
@@ -582,23 +608,28 @@ local function OrderCDManagerSpells_Actual(updateScope, scopedAnchorGroupsOverri
 	end
 
 	if updateScope ~= UPDATE_SCOPE.BUFF_BAR then
-		for _, customConfig in pairs(SCM.customConfig) do
-			CustomIcons.ProcessIcons(customConfig, Cache.cachedCooldownFrameTbl)
-		end
-
-		for _, customConfig in pairs(SCM.globalCustomConfig) do
-			CustomIcons.ProcessIcons(customConfig, Cache.cachedCooldownFrameTbl, true)
+		if scopedAnchorGroups then
+			for group in pairs(scopedAnchorGroups) do
+				CustomIcons.ProcessGroupIcons(group, Cache.cachedCooldownFrameTbl)
+			end
+		else
+			CustomIcons.ProcessGroupIcons(nil, Cache.cachedCooldownFrameTbl)
 		end
 	end
 
+	local allowLayoutSkip = scopedAnchorGroups and updateScope ~= UPDATE_SCOPE.BUFF_BAR
 	for group, visibleChildren in pairs(Cache.cachedCooldownFrameTbl) do
-		LayoutAnchorGroup(group, visibleChildren, Utils.GetAnchorConfigForGroup(config, group, SCM.globalAnchorConfig, SCM.buffBarsAnchorConfig), options, changedGroups, nil, (updateScope == UPDATE_SCOPE.BUFF or updateScope == UPDATE_SCOPE.ALL))
+		LayoutAnchorGroup(group, visibleChildren, Utils.GetAnchorConfigForGroup(config, group, SCM.globalAnchorConfig, SCM.buffBarsAnchorConfig), options, changedGroups, nil, updateScope == UPDATE_SCOPE.BUFF, allowLayoutSkip)
 	end
 
 	if not isFullBuffBarUpdate then
 		for _, children in pairs(Cache.cachedChildrenTbl) do
 			for _, child in ipairs(children) do
-				Icons.SetChildVisibilityState(child, child.SCMShouldBeVisible, true)
+				local appliedVisibility = child.SCMShouldBeVisible and not child.SCMLayoutLimited
+				local appliedLayoutLimited = child.SCMLayoutLimited and true or false
+				if child.SCMAppliedVisibility ~= appliedVisibility or child.SCMAppliedLayoutLimited ~= appliedLayoutLimited then
+					Icons.SetChildVisibilityState(child, child.SCMShouldBeVisible, true)
+				end
 			end
 		end
 	end
@@ -650,46 +681,50 @@ end
 CDM.OrderSpellsActual = OrderCDManagerSpells_Actual
 
 local isThrottled = false
-local hasPendingUpdate = false
-local pendingUpdateScope
+local pendingUpdateScopes = {}
 
-local function MergeUpdateScope(currentScope, newScope)
-	if not currentScope then
-		return newScope
+local function QueuePendingUpdateScope(updateScope)
+	if updateScope == UPDATE_SCOPE.ALL then
+		wipe(pendingUpdateScopes)
+		pendingUpdateScopes[UPDATE_SCOPE.ALL] = true
+		return
 	end
 
-	if currentScope == UPDATE_SCOPE.ALL or newScope == UPDATE_SCOPE.ALL then
-		return UPDATE_SCOPE.ALL
+	if not pendingUpdateScopes[UPDATE_SCOPE.ALL] then
+		pendingUpdateScopes[updateScope] = true
 	end
-
-	if currentScope ~= newScope then
-		return UPDATE_SCOPE.ALL
-	end
-
-	return currentScope
 end
 
 local function OnOrderThrottleTick()
 	isThrottled = false
-	if hasPendingUpdate then
-		hasPendingUpdate = false
-		OrderCDManagerSpells_Actual(pendingUpdateScope or UPDATE_SCOPE.ALL)
-		pendingUpdateScope = nil
+	if pendingUpdateScopes[UPDATE_SCOPE.ALL] then
+		OrderCDManagerSpells_Actual(UPDATE_SCOPE.ALL)
+	elseif next(pendingUpdateScopes) then
+		if pendingUpdateScopes[UPDATE_SCOPE.ESSENTIAL] then
+			OrderCDManagerSpells_Actual(UPDATE_SCOPE.ESSENTIAL)
+		end
+		if pendingUpdateScopes[UPDATE_SCOPE.UTILITY] then
+			OrderCDManagerSpells_Actual(UPDATE_SCOPE.UTILITY)
+		end
 	end
+	wipe(pendingUpdateScopes)
 end
 
 local function OrderCDManagerSpells(updateScope, applyNow)
 	updateScope = updateScope or UPDATE_SCOPE.ALL
 	if updateScope == UPDATE_SCOPE.BUFF or updateScope == UPDATE_SCOPE.BUFF_BAR or applyNow then
+		if applyNow or updateScope == UPDATE_SCOPE.ALL then
+			wipe(pendingUpdateScopes)
+		end
 		OrderCDManagerSpells_Actual(updateScope)
 		return
 	end
 	if isThrottled then
-		pendingUpdateScope = MergeUpdateScope(pendingUpdateScope, updateScope)
+		QueuePendingUpdateScope(updateScope)
 		return
 	end
 
-	hasPendingUpdate = true
+	QueuePendingUpdateScope(updateScope)
 	isThrottled = true
 	C_Timer.After(0.1, OnOrderThrottleTick)
 end

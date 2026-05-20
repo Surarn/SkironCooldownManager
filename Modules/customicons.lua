@@ -7,6 +7,7 @@ local Icons = SCM.Icons
 local Utils = SCM.Utils
 local GetIconType = Utils.GetIconType
 local ResetChildSCMState = Utils.ResetChildSCMState
+local ToGlobalGroup = Utils.ToGlobalGroup
 
 local CustomItemFrames = {}
 local CustomSpellFrames = {}
@@ -736,6 +737,9 @@ local function RebuildCustomIconLoadCache()
 	wipe(Cache.cachedCustomSpellEntriesBySpellID)
 	wipe(Cache.cachedCustomItemEntriesByItemID)
 	wipe(Cache.cachedCustomSlotEntriesByItemID)
+	for _, entries in pairs(Cache.cachedCustomIconsByGroup) do
+		wipe(entries)
+	end
 
 	local function CacheCustomConfig(customConfig, isGlobal)
 		if not customConfig then
@@ -744,6 +748,14 @@ local function RebuildCustomIconLoadCache()
 
 		for id, config in pairs(customConfig) do
 			local slotItemID = config.slotID and GetInventoryItemID("player", config.slotID) or nil
+			local group = isGlobal and ToGlobalGroup(config.anchorGroup or 1) or (config.anchorGroup or 1)
+			local groupEntries = Cache.cachedCustomIconsByGroup[group]
+			if not groupEntries then
+				groupEntries = {}
+				Cache.cachedCustomIconsByGroup[group] = groupEntries
+			end
+			groupEntries[#groupEntries + 1] = id
+			groupEntries[#groupEntries + 1] = config
 			CacheCustomIconEntry(id, config, isGlobal, slotItemID)
 			RequestCustomIconDataLoad(config, requestedSpellIDs, requestedItemIDs, slotItemID)
 		end
@@ -827,49 +839,77 @@ function CustomIcons.CreateIcons(customConfig, isGlobal, iconType)
 	end
 end
 
+local function ProcessCustomIcon(id, config, validChildren)
+	local anchorGroup = config.anchorGroup or 1
+	local customFrames = CustomIcons.GetCustomIconFrames(config)
+	if not customFrames then
+		return
+	end
+
+	if customFrames[id] and DoesItemOrSpellExists(config) and ShouldLoadCustomIcon(config) then
+		local frame = customFrames[id]
+		local iconType = frame.SCMIconType
+		local iconTexture = GetCustomIconTexture(config, iconType, frame)
+		if not iconTexture and SCM.isOptionsOpen then
+			iconTexture = 134400
+		end
+
+		if iconTexture then
+			if frame.SCMIconTexture ~= iconTexture then
+				frame.SCMIconTexture = iconTexture
+				frame.Icon:SetTexture(iconTexture)
+				UpdateCustomIconCraftQuality(frame, iconType, config)
+			end
+			local hasCount = SetCustomIconCountText(frame, iconType, config)
+			local isOnCooldown = UpdateCustomIconCooldown(frame, iconType, config)
+			local shouldShow = ShouldShowCustomIcon(config, iconType, hasCount, isOnCooldown)
+
+			Icons.SetChildVisibilityState(frame, shouldShow, true)
+			CDM.AddChildToScopedGroup(Cache.cachedChildrenTbl, anchorGroup, frame, frame.SCMGlobal)
+
+			if shouldShow then
+				if iconType == "spell" then
+					C_Spell.EnableSpellRangeCheck(config.spellID, config.showOutOfRange or false)
+
+					UpdateCustomIconCharges(frame, config.spellID)
+				end
+
+				CDM.AddChildToScopedGroup(validChildren, anchorGroup, frame, frame.SCMGlobal)
+			end
+		else
+			Icons.SetChildVisibilityState(customFrames[id], false, true)
+		end
+	elseif customFrames[id] then
+		Icons.SetChildVisibilityState(customFrames[id], false, true)
+	end
+end
+
+local function ProcessCustomIconEntries(entries, validChildren)
+	if not entries then
+		return
+	end
+
+	for i = 1, #entries, 2 do
+		ProcessCustomIcon(entries[i], entries[i + 1], validChildren)
+	end
+end
+
+function CustomIcons.ProcessGroupIcons(group, validChildren)
+	if group then
+		ProcessCustomIconEntries(Cache.cachedCustomIconsByGroup[group], validChildren)
+		return
+	end
+
+	for _, entries in pairs(Cache.cachedCustomIconsByGroup) do
+		ProcessCustomIconEntries(entries, validChildren)
+	end
+end
+
 function CustomIcons.ProcessIcons(customConfig, validChildren, isGlobal)
 	for id, config in pairs(customConfig) do
 		local anchorGroup = config.anchorGroup or 1
-		local customFrames = CustomIcons.GetCustomIconFrames(config)
-		if customFrames then
-			if CDM.IsScopedAnchorGroupAllowed(anchorGroup, isGlobal) then
-				if customFrames[id] and DoesItemOrSpellExists(config) and ShouldLoadCustomIcon(config) then
-					local frame = customFrames[id]
-					local iconType = frame.SCMIconType
-					local iconTexture = GetCustomIconTexture(config, iconType, frame)
-					if not iconTexture and SCM.isOptionsOpen then
-						iconTexture = 134400
-					end
-
-					if iconTexture then
-						if frame.SCMIconTexture ~= iconTexture then
-							frame.SCMIconTexture = iconTexture
-							frame.Icon:SetTexture(iconTexture)
-							UpdateCustomIconCraftQuality(frame, iconType, config)
-						end
-						local hasCount = SetCustomIconCountText(frame, iconType, config)
-						local isOnCooldown = UpdateCustomIconCooldown(frame, iconType, config)
-						local shouldShow = ShouldShowCustomIcon(config, iconType, hasCount, isOnCooldown)
-
-						Icons.SetChildVisibilityState(frame, shouldShow, true)
-						CDM.AddChildToScopedGroup(Cache.cachedChildrenTbl, anchorGroup, frame, isGlobal)
-
-						if shouldShow then
-							if iconType == "spell" then
-								C_Spell.EnableSpellRangeCheck(config.spellID, config.showOutOfRange or false)
-
-								UpdateCustomIconCharges(frame, config.spellID)
-							end
-
-							CDM.AddChildToScopedGroup(validChildren, anchorGroup, frame, isGlobal)
-						end
-					else
-						Icons.SetChildVisibilityState(customFrames[id], false, true)
-					end
-				elseif customFrames[id] then
-					Icons.SetChildVisibilityState(customFrames[id], false, true)
-				end
-			end
+		if CDM.IsScopedAnchorGroupAllowed(anchorGroup, isGlobal) then
+			ProcessCustomIcon(id, config, validChildren)
 		end
 	end
 end

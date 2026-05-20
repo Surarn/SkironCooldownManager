@@ -82,6 +82,9 @@ function Icons.SetChildVisibilityState(child, shouldShow, applyNow)
 		return
 	end
 
+	child.SCMAppliedVisibility = child.SCMShouldBeVisible and not child.SCMLayoutLimited
+	child.SCMAppliedLayoutLimited = child.SCMLayoutLimited and true or false
+
 	if child.viewerFrame then
 		if shouldShow and not child.SCMLayoutLimited then
 			Icons.ShowChild(child)

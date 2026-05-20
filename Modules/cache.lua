@@ -18,6 +18,7 @@ Cache.cachedAnchorOffsetVisited = {}
 Cache.cachedCustomSpellEntriesBySpellID = {}
 Cache.cachedCustomItemEntriesByItemID = {}
 Cache.cachedCustomSlotEntriesByItemID = {}
+Cache.cachedCustomIconsByGroup = {}
 Cache.customIconRequests = {}
 Cache.scopedGroupTables = {}
 Cache.cachedScopedAnchorGroups = {
