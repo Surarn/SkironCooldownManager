@@ -204,6 +204,8 @@ local function UpdateAnchorLinks(config)
 end
 
 local function LayoutAnchorGroup(group, visibleChildren, anchorConfig, options, changedGroups, resetSize, checkDuplicates, allowLayoutSkip)
+	Cache.cachedVisitedAnchorGroups[group] = true
+
 	local state = GetAnchorState(group)
 	local rowConfig = (anchorConfig and anchorConfig.rowConfig and #anchorConfig.rowConfig > 0) and anchorConfig.rowConfig or DEFAULT_ROW_CONFIG
 	local lastRowConfig = rowConfig[#rowConfig]
@@ -383,7 +385,20 @@ local function LayoutAnchorGroup(group, visibleChildren, anchorConfig, options, 
 	state.effectiveHeight = effectiveHeight
 	state.anchorOffsetY = anchorOffsetY
 
-	local groupAnchor = SCM:GetAnchor(group, point, anchor, relativePoint, xOffset, yOffset, growDir, initialWidth, resetSize, anchorOffsetY)
+	local groupAnchor = SCM:GetAnchor(
+		group,
+		point,
+		anchor,
+		relativePoint,
+		xOffset,
+		yOffset,
+		growDir,
+		initialWidth,
+		resetSize,
+		anchorOffsetY,
+		effectiveWidth,
+		effectiveHeight
+	)
 
 	if parentChanged then
 		Cache.cachedAnchorLinksDirty = true
@@ -650,6 +665,7 @@ local function OrderCDManagerSpells_Actual(updateScope, scopedAnchorGroupsOverri
 	end
 
 	local allowLayoutSkip = scopedAnchorGroups and updateScope ~= UPDATE_SCOPE.BUFF_BAR
+	wipe(Cache.cachedVisitedAnchorGroups)
 	for group, visibleChildren in pairs(Cache.cachedCooldownFrameTbl) do
 		LayoutAnchorGroup(
 			group,
@@ -675,13 +691,14 @@ local function OrderCDManagerSpells_Actual(updateScope, scopedAnchorGroupsOverri
 		end
 	end
 
-	wipe(Cache.cachedVisitedAnchorGroups)
 	if updateScope ~= UPDATE_SCOPE.BUFF_BAR then
 		if config.anchorConfig then
 			for group = 1, #config.anchorConfig do
-				local anchorConfig = Utils.GetAnchorConfigForGroup(config, group)
-				Cache.cachedVisitedAnchorGroups[group] = true
-				LayoutEmptyAnchorGroup(group, anchorConfig, scopedAnchorGroups, changedGroups, options)
+				if not Cache.cachedVisitedAnchorGroups[group] then
+					local anchorConfig = Utils.GetAnchorConfigForGroup(config, group)
+					Cache.cachedVisitedAnchorGroups[group] = true
+					LayoutEmptyAnchorGroup(group, anchorConfig, scopedAnchorGroups, changedGroups, options)
+				end
 			end
 		end
 

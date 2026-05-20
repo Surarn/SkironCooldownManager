@@ -438,7 +438,7 @@ function SCM:GetManagedAnchorChildAnchor(group, groupAnchor, point, anchor, rela
 	return proxy, true
 end
 
-function SCM:GetAnchor(group, point, anchor, relativePoint, xOffset, yOffset, growDir, iconSize, resetSize, anchorOffsetY)
+function SCM:GetAnchor(group, point, anchor, relativePoint, xOffset, yOffset, growDir, iconSize, resetSize, anchorOffsetY, resetWidth, resetHeight)
 	local anchorFrame = self.anchorFrames[group]
 	if not anchorFrame then
 		anchorFrame = CreateFrame("Frame", "SCM_GroupAnchor_" .. group, UIParent)
@@ -493,7 +493,7 @@ function SCM:GetAnchor(group, point, anchor, relativePoint, xOffset, yOffset, gr
 	local appliedXOffset, appliedYOffset = GetAnchorPointOffsets(point, growDir, iconSize, xOffset, yOffset, anchorOffsetY)
 
 	if resetSize then
-		anchorFrame:SetSize(SCM:PixelPerfect(iconSize), SCM:PixelPerfect(iconSize))
+		anchorFrame:SetSize(SCM:PixelPerfect(resetWidth or iconSize), SCM:PixelPerfect(resetHeight or iconSize))
 	else
 		anchorFrame:SetSize(SCM:PixelPerfect(max(anchorFrame:GetWidth(), iconSize)), SCM:PixelPerfect(max(anchorFrame:GetHeight(), iconSize)))
 	end
