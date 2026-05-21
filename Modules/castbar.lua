@@ -47,7 +47,7 @@ local function CreatePips(empoweredStages)
 	local totalWidth = castBar.Status:GetWidth()
 	local totalHeight = castBar.Status:GetHeight()
 	local total = 0
-	local options = castBar.barOptions or SCM.db.profile.options.castBar
+	local options = castBar.barOptions or SCM.castBarConfig
 	local stageColors = options.empoweredStageColors
 	local tickOptions = options.ticks
 	local tickIndex = 1
@@ -116,7 +116,7 @@ end
 
 local function UpdateIconTexture(spellTexture)
 	local castBar = SCM.CastBar
-	local iconOptions = castBar.barOptions and castBar.barOptions.icon or SCM.db.profile.options.castBar.icon
+	local iconOptions = castBar.barOptions and castBar.barOptions.icon or SCM.castBarConfig.icon
 
 	castBar.CurrentSpellTexture = spellTexture
 
@@ -131,7 +131,7 @@ end
 
 local function UpdateStatusBarLook(fillColor, bgColor)
 	local castBar = SCM.CastBar
-	local options = castBar.barOptions or SCM.db.profile.options.castBar
+	local options = castBar.barOptions or SCM.castBarConfig
 	local profileOptions = SCM.db.profile.options
 
 	local borderSize = SCM:PixelPerfect() * profileOptions.borderSize
@@ -146,7 +146,7 @@ local function UpdateStatusBarLook(fillColor, bgColor)
 		anchorFrame.SCMCastBarWidthHook = true
 		anchorFrame:HookScript("OnSizeChanged", function()
 			local currentCastBar = SCM.CastBar
-			local currentOptions = SCM.db and SCM.db.profile and SCM.db.profile.options and SCM.db.profile.options.castBar
+			local currentOptions = SCM.castBarConfig
 			if currentCastBar and currentOptions and currentOptions.matchParentWidth then
 				SCM:RefreshCastBarWidth()
 			end
@@ -437,7 +437,7 @@ function SCM:RefreshCastBarWidth(delay)
 
 	C_Timer.After(delay or 0.05, function()
 		local currentCastBar = SCM.CastBar
-		local currentOptions = currentCastBar and (currentCastBar.barOptions or SCM.db.profile.options.castBar)
+		local currentOptions = currentCastBar and (currentCastBar.barOptions or SCM.castBarConfig)
 		if not currentCastBar or not currentOptions or not currentOptions.matchParentWidth then
 			return
 		end
@@ -458,7 +458,7 @@ function SCM:RefreshCastBarLayout()
 		return
 	end
 
-	castBar.barOptions = self.db.profile.options.castBar
+	castBar.barOptions = self.castBarConfig
 	UpdateStatusBarLook()
 
 	if castBar:IsShown() and castBar.CurrentEmpoweredStages and castBar.Status:GetStatusBarTexture() then
@@ -513,7 +513,7 @@ end
 
 function SCM:UpdateCastBar()
 	local castBar = self.CastBar
-	local options = SCM.db.profile.options.castBar
+	local options = SCM.castBarConfig
 	if not castBar then
 		return
 	end

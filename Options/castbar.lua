@@ -171,10 +171,6 @@ end
 local function CastBar(self)
 	self:ReleaseChildren()
 
-	local options = SCM.db.profile.options.castBar
-	local iconOptions = options.icon
-	local tickOptions = options.ticks
-
 	local rootGroup = AceGUI:Create("InlineGroup")
 	rootGroup:SetLayout("fill")
 	rootGroup:SetFullWidth(true)
@@ -195,6 +191,74 @@ local function CastBar(self)
 	label:SetText("|TInterface\\common\\help-i:40:40:0:0|tRight now the cast bar is still in an experimental state. Please report any bugs on github/curseforge or on discord.")
 	label:SetFontObject("Game12Font")
 	scrollFrame:AddChild(label)
+
+	local statusGroup = AceGUI:Create("InlineGroup")
+	statusGroup:SetFullWidth(true)
+	statusGroup:SetLayout("flow")
+	scrollFrame:AddChild(statusGroup)
+
+	local currentStatus = AceGUI:Create("Label")
+	currentStatus:SetRelativeWidth(0.33)
+	currentStatus:SetJustifyH("LEFT")
+	currentStatus:SetJustifyV("MIDDLE")
+	currentStatus:SetFontObject("Game15Font")
+	statusGroup:AddChild(currentStatus)
+
+	if SCM.castBarConfig.active then
+		currentStatus:SetText(string.format("Status: |cffea00ffSpecialization|r (%s)", (select(2, SCM.Utils.GetSpec()))))
+	else
+		currentStatus:SetText("Status: |cfffcf803Profile|r")
+	end
+
+	local modifyCurrentSpecialization = AceGUI:Create("CheckBox")
+	modifyCurrentSpecialization:SetRelativeWidth(0.33)
+	modifyCurrentSpecialization:SetLabel("Use Specialization Config")
+	modifyCurrentSpecialization:SetValue(SCM.castBarConfig.active)
+	statusGroup:AddChild(modifyCurrentSpecialization)
+
+	local resetCurrentSpecialization = AceGUI:Create("Button")
+	resetCurrentSpecialization:SetText("Clear Spec Config")
+	resetCurrentSpecialization:SetRelativeWidth(0.33)
+	resetCurrentSpecialization:SetDisabled(not SCM.castBarConfig.active)
+	resetCurrentSpecialization:SetCallback("OnEnter", function()
+		GameTooltip:SetOwner(self.frame, "ANCHOR_CURSOR")
+		GameTooltip:SetText("Clear Spec Config", nil, nil, nil, nil, true)
+		GameTooltip:AddLine("This will clear the spec config and fall back to the normal resource bar options.", 1, 1, 1, true)
+		GameTooltip:Show()
+	end)
+	resetCurrentSpecialization:SetCallback("OnLeave", function()
+		GameTooltip:Hide()
+	end)
+	statusGroup:AddChild(resetCurrentSpecialization)
+
+	resetCurrentSpecialization:SetCallback("OnClick", function()
+		local specCastBarConfig = SCM.specCastBarConfig
+		local isActive = specCastBarConfig.active
+
+		wipe(specCastBarConfig)
+		specCastBarConfig.active = isActive
+
+		CastBar(self)
+		RefreshCastBar()
+	end)
+
+	modifyCurrentSpecialization:SetCallback("OnValueChanged", function(_, _, value)
+		SCM.castBarConfig.active = value
+
+		if value then
+			currentStatus:SetText(string.format("Status: |cffea00ffSpecialization|r (%s)", (select(2, SCM.Utils.GetSpec()))))
+		else
+			currentStatus:SetText("Status: |cfffcf803Profile|r")
+		end
+
+		CastBar(self)
+		resetCurrentSpecialization:SetDisabled(not value)
+		RefreshCastBar()
+	end)
+
+	local options = SCM.castBarConfig
+	local iconOptions = options.icon
+	local tickOptions = options.ticks
 
 	local generalGroup = AceGUI:Create("InlineGroup")
 	generalGroup:SetTitle("General")

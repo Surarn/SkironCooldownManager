@@ -52,8 +52,7 @@ local function NormalizeTrackedBarSpellConfig(spellConfig)
 			local trackedBarGroup = config.source[Enum.CooldownViewerCategory.TrackedBar]
 			local normalizedTrackedBarGroup = Utils.NormalizeBuffBarGroup(trackedBarGroup)
 			local legacyGroup = normalizedTrackedBarGroup and (normalizedTrackedBarGroup - 200)
-			local groupConfig = (trackedBarGroup and config.anchorGroup[trackedBarGroup])
-				or (legacyGroup and config.anchorGroup[legacyGroup])
+			local groupConfig = (trackedBarGroup and config.anchorGroup[trackedBarGroup]) or (legacyGroup and config.anchorGroup[legacyGroup])
 
 			if trackedBarGroup ~= normalizedTrackedBarGroup then
 				config.source[Enum.CooldownViewerCategory.TrackedBar] = normalizedTrackedBarGroup
@@ -74,19 +73,19 @@ local function NormalizeTrackedBarSpellConfig(spellConfig)
 	end
 end
 
-local function CreateResourceBarConfig(resourceBarConfig, specResourceBarConfig, isActive, setSpecConfig)
-	resourceBarConfig = resourceBarConfig or {}
+local function CreateSpecFallbackConfig(config, specConfig, isActive, setSpecConfig)
+	config = config or {}
 	setSpecConfig = setSpecConfig or nop
 
 	isActive = isActive or function()
-		return specResourceBarConfig and specResourceBarConfig.active
+		return specConfig and specConfig.active
 	end
 
 	local function SaveSpecConfig()
-		specResourceBarConfig = specResourceBarConfig or {}
-		setSpecConfig(specResourceBarConfig)
+		specConfig = specConfig or {}
+		setSpecConfig(specConfig)
 		setSpecConfig = nop
-		return specResourceBarConfig
+		return specConfig
 	end
 
 	local function CreateChildConfig(key)
@@ -94,7 +93,7 @@ local function CreateResourceBarConfig(resourceBarConfig, specResourceBarConfig,
 			SaveSpecConfig()[key] = childConfig
 		end
 
-		return CreateResourceBarConfig(resourceBarConfig[key], specResourceBarConfig and specResourceBarConfig[key], isActive, SaveChildConfig)
+		return CreateSpecFallbackConfig(config[key], specConfig and specConfig[key], isActive, SaveChildConfig)
 	end
 
 	local metatable = {
@@ -104,12 +103,12 @@ local function CreateResourceBarConfig(resourceBarConfig, specResourceBarConfig,
 			end
 
 			if not isActive() then
-				return resourceBarConfig[key]
+				return config[key]
 			end
 
-			local value = specResourceBarConfig and specResourceBarConfig[key]
+			local value = specConfig and specConfig[key]
 			if value == nil then
-				value = resourceBarConfig[key]
+				value = config[key]
 			end
 
 			if type(value) == "table" then
@@ -123,14 +122,14 @@ local function CreateResourceBarConfig(resourceBarConfig, specResourceBarConfig,
 				SaveSpecConfig()[key] = value
 			elseif isActive() then
 				if IsShiftKeyDown() then
-					if specResourceBarConfig then
-						specResourceBarConfig[key] = nil
+					if specConfig then
+						specConfig[key] = nil
 					end
 				else
 					SaveSpecConfig()[key] = value
 				end
 			else
-				resourceBarConfig[key] = value
+				config[key] = value
 			end
 		end,
 	}
@@ -158,6 +157,7 @@ function SCM:UpdateDB()
 	local specSpellConfig = currentConfig and currentConfig.spellConfig[specID]
 	local specCustomConfig = currentConfig and currentConfig.customConfig and currentConfig.customConfig[specID]
 	local specResourceBarConfig = currentConfig and currentConfig.resourceBarConfig and currentConfig.resourceBarConfig[specID]
+	local specCastBarConfig = currentConfig and currentConfig.castBarConfig and currentConfig.castBarConfig[specID]
 
 	self.db.profile[class] = self.db.profile[class] or {}
 	self.db.profile[class][specID] = self.db.profile[class][specID]
@@ -167,6 +167,7 @@ function SCM:UpdateDB()
 			spellConfig = specSpellConfig or {},
 			customConfig = specCustomConfig or {},
 			resourceBarConfig = specResourceBarConfig or {},
+			castBarConfig = specCastBarConfig or {},
 		}
 
 	self.currentConfig = self.db.profile[class][specID]
@@ -181,7 +182,11 @@ function SCM:UpdateDB()
 
 	self.currentConfig.resourceBarConfig = self.currentConfig.resourceBarConfig or {}
 	self.specResourceBarConfig = self.currentConfig.resourceBarConfig
-	self.resourceBarConfig = CreateResourceBarConfig(options.resourceBar, self.currentConfig.resourceBarConfig)
+	self.resourceBarConfig = CreateSpecFallbackConfig(options.resourceBar, self.currentConfig.resourceBarConfig)
+
+	self.currentConfig.castBarConfig = self.currentConfig.castBarConfig or {}
+	self.specCastBarConfig = self.currentConfig.castBarConfig
+	self.castBarConfig = CreateSpecFallbackConfig(options.castBar, self.currentConfig.castBarConfig)
 
 	self.currentConfig.buffBarsAnchorConfig = self.currentConfig.buffBarsAnchorConfig or {}
 	self.buffBarsAnchorConfig = CreateAnchorConfigTables(self.currentConfig.buffBarsAnchorConfig)
