@@ -195,8 +195,12 @@ function Icons.SetupBuffBarHooks(child)
 	child.SCMShowHook = true
 
 	child:HookScript("OnShow", OnShow)
-	child:HookScript("OnHide", OnHide)
-	--hooksecurefunc(child, "OnAuraInstanceInfoCleared", OnHide)
+
+	if Constants.FakeAuras[child.SCMSpellID] then
+		child:HookScript("OnHide", OnHide)
+	else
+		hooksecurefunc(child, "OnAuraInstanceInfoCleared", OnHide)
+	end
 end
 
 local function GetOrCacheChildren(viewer, shouldRefreshCache)
