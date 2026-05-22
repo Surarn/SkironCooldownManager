@@ -401,7 +401,7 @@ local function SetAnchorVisibilityHooks(group, anchor, selectedAnchorFrame, grou
 	end
 end
 
-function SCM:GetManagedAnchorChildAnchor(group, groupAnchor, point, anchor, relativePoint, xOffset, yOffset, growDir, offsetWidth, frameWidth, frameHeight, anchorOffsetY)
+function SCM:GetManagedAnchorChildAnchor(group, groupAnchor, point, anchor, relativePoint, xOffset, yOffset, growDir, offsetWidth, frameWidth, frameHeight, anchorOffsetY, forceProxyAnchor)
 	local state = Cache.cachedAnchorStates[group]
 	if not state then
 		return groupAnchor, false
@@ -412,7 +412,7 @@ function SCM:GetManagedAnchorChildAnchor(group, groupAnchor, point, anchor, rela
 		return groupAnchor, false
 	end
 
-	local useProxy = InCombatLockdown() and state.currentAnchorFrame == anchor and (state.currentProxyRequired or state.currentProxyActive)
+	local useProxy = InCombatLockdown() and (forceProxyAnchor or (state.currentAnchorFrame == anchor and (state.currentProxyRequired or state.currentProxyActive)))
 
 	if not useProxy then
 		if not InCombatLockdown() then
@@ -434,13 +434,14 @@ function SCM:GetManagedAnchorChildAnchor(group, groupAnchor, point, anchor, rela
 
 	proxy:SetFrameStrata((groupAnchor and groupAnchor:GetFrameStrata()) or "HIGH")
 	proxy:SetScale((groupAnchor and groupAnchor:GetScale()) or Cache.cachedViewerScale or 1)
+	
+	state.currentProxyRequired = nil
+	state.currentProxyActive = true
+
 	proxy:SetSize(SCM:PixelPerfect(max(frameWidth, 1)), SCM:PixelPerfect(max(frameHeight, 1)))
 	proxy:ClearAllPoints()
 	proxy:SetPoint(self:GetAnchorPivot(point, growDir), target, relativePoint, GetAnchorPointOffsets(point, growDir, offsetWidth, xOffset, yOffset, anchorOffsetY))
 	proxy:Show()
-
-	state.currentProxyRequired = nil
-	state.currentProxyActive = true
 
 	return proxy, true
 end
@@ -482,6 +483,10 @@ function SCM:GetAnchor(group, point, anchor, relativePoint, xOffset, yOffset, gr
 	end
 
 	local state = GetAnchorState(group)
+	if anchorFrame:IsProtected() then
+		GetProxy(group)
+	end
+
 	local target = anchor
 	local selectedAnchorRef
 	if type(target) == "string" then

@@ -217,7 +217,7 @@ local function LayoutAnchorGroup(group, visibleChildren, anchorConfig, options, 
 	local initialHeight = rowConfig[1].iconHeight or rowConfig[1].size or 47
 	local isCentered = growDir == "CENTER" or growDir == "CENTERED"
 	local isFixed = growDir == "FIXED"
-	local lockGroupSize = group == 1 and SCM.anchorFrames[1] and SCM.anchorFrames[1]:IsProtected()
+	local lockGroupSize = group == 1 and SCM.anchorFrames[1] and SCM.anchorFrames[1]:IsProtected() and InCombatLockdown()
 	local growsUp = secondaryGrowDir == "UP"
 	local verticalPoint = growsUp and "BOTTOM" or "TOP"
 	local startPoint = (isCentered or isFixed) and verticalPoint or (verticalPoint .. (growDir == "LEFT" and "RIGHT" or "LEFT"))
@@ -261,7 +261,7 @@ local function LayoutAnchorGroup(group, visibleChildren, anchorConfig, options, 
 		layoutSignature = layoutSignature + (cooldownSignature * index) + ((child.SCMOrder or 0) * 17)
 	end
 
-	if isFixed or lockGroupSize then
+	if isFixed then
 		layoutChildren = configuredChildren or visibleChildren
 		table.sort(layoutChildren, SortBySCMOrder)
 	end
@@ -420,7 +420,7 @@ local function LayoutAnchorGroup(group, visibleChildren, anchorConfig, options, 
 		state.appliedAnchorOffsetY = anchorOffsetY
 	end
 
-	local childAnchor, useProxyAnchor = SCM:GetManagedAnchorChildAnchor(group, groupAnchor, point, anchor, relativePoint, xOffset, yOffset, growDir, firstRowWidth, effectiveWidth, effectiveHeight, anchorOffsetY)
+	local childAnchor, useProxyAnchor = SCM:GetManagedAnchorChildAnchor(group, groupAnchor, point, anchor, relativePoint, xOffset, yOffset, growDir, firstRowWidth, effectiveWidth, effectiveHeight, anchorOffsetY, lockGroupSize)
 	local anchorOffsetChanged = SCM:UpdateAnchorOffset(group, true)
 	if useProxyAnchor and changedGroups and anchorOffsetChanged then
 		changedGroups[group] = true
