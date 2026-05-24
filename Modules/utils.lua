@@ -21,6 +21,7 @@ local CHILD_SCM_RESET_FIELDS = {
 	"SCMBuffBar",
 	"SCMBuffOptions",
 	"SCMIconOptions",
+	"SCMCheckCooldownFrame",
 	"SCMChanged",
 	"SCMCustom",
 	"SCMIconType",

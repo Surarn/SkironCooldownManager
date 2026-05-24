@@ -208,8 +208,8 @@ function Icons.SetupBuffBarHooks(child)
 	end
 end
 
-local function GetOrCacheChildren(viewer, shouldRefreshCache)
-	if shouldRefreshCache or not Cache.cachedViewerChildren[viewer] then
+local function GetOrCacheChildren(viewer)
+	if not Cache.cachedViewerChildren[viewer] or (viewer:GetNumChildren() ~= #Cache.cachedViewerChildren[viewer]) then
 		Cache.cachedViewerChildren[viewer] = { viewer:GetChildren() }
 	end
 
@@ -484,7 +484,7 @@ function Icons.ProcessChildren(viewer, validChildren, viewerData)
 		return
 	end
 
-	local children = GetOrCacheChildren(viewer, viewerData.isBuffIcon or viewerData.isBuffBar)
+	local children = GetOrCacheChildren(viewer)
 	local categoryIndex = SCM.CooldownViewerNameToIndex[viewer:GetName()]
 	local options = SCM.db.profile.options
 	viewer.SCMUpdateScope = viewerData.updateScope

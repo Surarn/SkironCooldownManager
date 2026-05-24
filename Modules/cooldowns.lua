@@ -111,7 +111,8 @@ local function OnBuffHidePandemicStateFrame(self)
 end
 
 function Cooldowns.SetupBuffIconHooks(child, options)
-	if child.SCMShowHook and (not Constants.FakeAuras[child.SCMSpellID] or child.SCMCheckCooldownFrame) then
+	local checkCooldownFrame = Constants.FakeAuras[child.SCMSpellID] or Constants.TargetAuras[child.SCMSpellID]
+	if (checkCooldownFrame and child.SCMCooldownHooked) or (not checkCooldownFrame and child.SCMAuraHooked) then
 		return
 	end
 
@@ -119,7 +120,7 @@ function Cooldowns.SetupBuffIconHooks(child, options)
 	child.SCMBuffOptions = options
 
 	-- Cooldowns
-	if Constants.FakeAuras[child.SCMSpellID] or Constants.TargetAuras[child.SCMSpellID] then
+	if checkCooldownFrame then
 		if not child.SCMCooldownHooked then
 			hooksecurefunc(child.Cooldown, "SetCooldown", OnBuffCooldownSet)
 			hooksecurefunc(child.Cooldown, "Clear", OnBuffCooldownEnd)
