@@ -86,15 +86,15 @@ end
 
 local function RefreshCooldownViewerData(releaseCustomIcons)
 	SCM:InvalidateAnchorLinks()
-	SCM:ClearViewerChildrenCache()
 	SCM:UpdateCooldownInfo(true)
 	SCM:UpdateDB()
 
 	if releaseCustomIcons then
+		SCM:ResetCooldownViewerRuntimeState()
 		SCM.CustomIcons.ReleaseAllIcons()
 	end
 	SCM:CreateAllCustomIcons()
-	SCM:ApplyAllCDManagerConfigs()
+	SCM:ApplyAllCDManagerConfigs(true)
 	SCM:UpdateCastBar()
 	SCM:RefreshResourceBarConfig()
 end
@@ -244,16 +244,7 @@ function SCM:TRAIT_CONFIG_UPDATED()
 end
 
 function SCM:ACTIVE_PLAYER_SPECIALIZATION_CHANGED()
-	for _, viewerName in ipairs({ "EssentialCooldownViewer", "UtilityCooldownViewer", "BuffIconCooldownViewer", "BuffBarCooldownViewer" }) do
-		local viewer = _G[viewerName]
-		if viewer then
-			local children = SCM.Cache.cachedViewerChildren[viewer] or { viewer:GetChildren() }
-			for _, child in ipairs(children) do
-				SCM.Utils.ResetChildSCMState(child)
-			end
-			SCM:InvalidateViewerChildrenCache(viewer)
-		end
-	end
+	SCM:ResetCooldownViewerRuntimeState()
 
 	C_Timer.After(0.5, function()
 		RefreshCooldownViewerData(true)

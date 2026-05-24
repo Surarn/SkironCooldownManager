@@ -209,7 +209,7 @@ function Icons.SetupBuffBarHooks(child)
 end
 
 local function GetOrCacheChildren(viewer, shouldRefreshCache)
-	if not Cache.cachedViewerChildren[viewer] then
+	if shouldRefreshCache or not Cache.cachedViewerChildren[viewer] then
 		Cache.cachedViewerChildren[viewer] = { viewer:GetChildren() }
 	end
 
@@ -368,8 +368,6 @@ local function ProcessSingleChild(child, validChildren, categoryIndex, isBuffIco
 		return
 	end
 
-	local oldCooldownID = child.SCMCooldownID
-	local oldGroup = child.SCMGroup
 	local activeScopedAnchorGroups = Cache.activeScopedAnchorGroups
 	local cooldownID = child:GetCooldownID()
 	local categoryConfig = categoryIndex and SCM.defaultCooldownViewerConfig[categoryIndex]
@@ -383,10 +381,6 @@ local function ProcessSingleChild(child, validChildren, categoryIndex, isBuffIco
 
 	local configID, childData = GetSpellConfigByCooldownID(SCM.spellConfig, cooldownID)
 	if not (cooldownID and spellID and childData) then
-		if activeScopedAnchorGroups and oldGroup then
-			activeScopedAnchorGroups[oldGroup] = true
-		end
-
 		Utils.ResetChildSCMState(child)
 		Icons.SetChildVisibilityState(child, false, true)
 		return
@@ -395,10 +389,6 @@ local function ProcessSingleChild(child, validChildren, categoryIndex, isBuffIco
 	local group = GetConfiguredGroupForCategory(childData, categoryIndex)
 	local groupConfig = childData.anchorGroup and childData.anchorGroup[group]
 	if not (group and groupConfig) then
-		if activeScopedAnchorGroups and oldGroup then
-			activeScopedAnchorGroups[oldGroup] = true
-		end
-
 		Utils.ResetChildSCMState(child)
 		Icons.SetChildVisibilityState(child, false, true)
 		return
@@ -407,7 +397,7 @@ local function ProcessSingleChild(child, validChildren, categoryIndex, isBuffIco
 	if activeScopedAnchorGroups and not activeScopedAnchorGroups[group] then
 		return
 	end
-	
+
 	AddChildToGroup(validChildren, group, child)
 
 	child.SCMChanged = (not child.SCMConfig or child.SCMConfig ~= groupConfig) or (not child.SCMCooldownID or child.SCMCooldownID ~= cooldownID)

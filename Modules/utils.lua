@@ -30,7 +30,6 @@ local CHILD_SCM_RESET_FIELDS = {
 	"SCMPandemic",
 	"SCMRowConfig",
 	"SCMShouldBeVisible",
-	"SCMHidden",
 	"SCMGlow",
 	"SCMActiveGlow",
 	"SCMAnchorFrame",
