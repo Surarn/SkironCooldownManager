@@ -201,6 +201,14 @@ function SCM:SPELL_UPDATE_USES(spellID, baseSpellID)
 	SCM.CustomIcons.UpdateSpellUses(spellID, baseSpellID)
 end
 
+function SCM:SPELL_ACTIVATION_OVERLAY_GLOW_SHOW(spellID, ...)
+	SCM.CustomIcons.UpdateSpellGlow(spellID, "SHOW")
+end
+
+function SCM:SPELL_ACTIVATION_OVERLAY_GLOW_HIDE(spellID)
+	SCM.CustomIcons.UpdateSpellGlow(spellID, "HIDE")
+end
+
 function SCM:PLAYER_EQUIPMENT_CHANGED()
 	SCM:CreateAllCustomIcons("slot")
 	SCM:ApplyAnchorGroupByIconType("slot")
@@ -338,6 +346,8 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 	eventFrame:RegisterEvent("SPELL_UPDATE_USES")
 	eventFrame:RegisterEvent("SPELL_UPDATE_USABLE")
 	eventFrame:RegisterEvent("SPELL_RANGE_CHECK_UPDATE")
+	eventFrame:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW")
+	eventFrame:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE")
 	eventFrame:RegisterEvent("COOLDOWN_VIEWER_SPELL_OVERRIDE_UPDATED")
 	eventFrame:RegisterEvent("BAG_UPDATE_DELAYED")
 	eventFrame:RegisterEvent("TRAIT_CONFIG_UPDATED")

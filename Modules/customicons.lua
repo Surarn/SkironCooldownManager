@@ -484,6 +484,34 @@ function CustomIcons.UpdateSpellUses(spellID, baseSpellID)
 	end
 end
 
+function CustomIcons.UpdateSpellGlow(spellID, event)
+	local entriesBySpellID = Cache.cachedCustomSpellEntriesBySpellID[spellID]
+
+	if not entriesBySpellID then
+		for baseSpellID, entries in pairs(Cache.cachedCustomSpellEntriesBySpellID) do
+			if C_Spell.GetOverrideSpell(baseSpellID) == spellID then
+				entriesBySpellID = entries
+			end
+		end
+
+		if not entriesBySpellID then
+			return
+		end
+	end
+
+	for i = 1, #entriesBySpellID do
+		local entry = entriesBySpellID[i]
+		local frame = CustomSpellFrames[entry.id]
+		if frame and not frame.SCMReleased then
+			if event == "SHOW" then
+				SCM:StartCustomGlow(frame)
+			else
+				SCM:StopCustomGlow(frame)
+			end
+		end
+	end
+end
+
 local function DoesItemOrSpellExists(config)
 	local iconType = GetIconType(config)
 	if iconType == "empty" then
