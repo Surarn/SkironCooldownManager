@@ -641,6 +641,13 @@ local function OrderCDManagerSpells_Actual(updateScope, scopedAnchorGroupsOverri
 	UpdateAnchorLinks(config)
 
 	local viewerProcessOrder = (scopedAnchorGroups and updateScope ~= UPDATE_SCOPE.BUFF_BAR) and VIEWER_PROCESS_ORDER or VIEWER_PROCESS_ORDER_BY_SCOPE[updateScope] or VIEWER_PROCESS_ORDER
+	if scopedAnchorGroups and updateScope ~= UPDATE_SCOPE.BUFF_BAR then
+		for i = 1, #viewerProcessOrder do
+			local viewerData = viewerProcessOrder[i]
+			Icons.ExpandScopedAnchorGroups(_G[viewerData.frameName], viewerData, scopedAnchorGroups)
+		end
+	end
+
 	for i = 1, #viewerProcessOrder do
 		local viewerData = viewerProcessOrder[i]
 		Icons.ProcessChildren(_G[viewerData.frameName], Cache.cachedChildrenTbl, viewerData)

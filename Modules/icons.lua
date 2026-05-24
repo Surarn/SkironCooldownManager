@@ -268,6 +268,51 @@ function Icons.CollectScopedAnchorGroups(updateScope, config, viewerUpdateMappin
 	return targetGroups
 end
 
+function Icons.ExpandScopedAnchorGroups(viewer, viewerData, scopedAnchorGroups)
+	if not (viewerData and scopedAnchorGroups) or viewerData.isBuffBar then
+		return
+	end
+
+	local children = GetOrCacheChildren(viewer, viewerData.isBuffIcon)
+	local categoryIndex = SCM.CooldownViewerNameToIndex[viewer:GetName()]
+	local defaultCooldownIDs = SCM.defaultCooldownViewerConfig.cooldownIDs
+	if not defaultCooldownIDs then
+		return
+	end
+
+	for _, child in ipairs(children) do
+		if child.Icon and child.GetCooldownID then
+			local oldCooldownID = child.SCMCooldownID
+			local oldGroup = child.SCMGroup
+			local cooldownID = child:GetCooldownID()
+			local _, childData = GetSpellConfigByCooldownID(SCM.spellConfig, cooldownID)
+
+			if not (cooldownID and childData) then
+				if oldGroup then
+					Cache.cachedAnchorStates[oldGroup].layoutSignature = nil
+					scopedAnchorGroups[oldGroup] = true
+				end
+			else
+				local group = GetConfiguredGroupForCategory(childData, categoryIndex)
+				local groupConfig = childData.anchorGroup[group]
+				if not (group and groupConfig) then
+					if oldGroup then
+						Cache.cachedAnchorStates[oldGroup].layoutSignature = nil
+						scopedAnchorGroups[oldGroup] = true
+					end
+				elseif oldCooldownID ~= cooldownID or oldGroup ~= group then
+					if oldGroup then
+						Cache.cachedAnchorStates[oldGroup].layoutSignature = nil
+						scopedAnchorGroups[oldGroup] = true
+					end
+					Cache.cachedAnchorStates[group].layoutSignature = nil
+					scopedAnchorGroups[group] = true
+				end
+			end
+		end
+	end
+end
+
 local function ProcessBuffIcon(child, childData, options)
 	Cooldowns.SetupBuffIconHooks(child, options)
 	child.SCMBuffOptions = options
@@ -359,15 +404,10 @@ local function ProcessSingleChild(child, validChildren, categoryIndex, isBuffIco
 		return
 	end
 
-	if activeScopedAnchorGroups and (oldCooldownID ~= cooldownID or oldGroup ~= group) then
-		if oldGroup then
-			activeScopedAnchorGroups[oldGroup] = true
-			Cache.cachedAnchorStates[oldGroup].layoutSignature = nil
-		end
-		activeScopedAnchorGroups[group] = true
-		Cache.cachedAnchorStates[group].layoutSignature = nil
+	if activeScopedAnchorGroups and not activeScopedAnchorGroups[group] then
+		return
 	end
-
+	
 	AddChildToGroup(validChildren, group, child)
 
 	child.SCMChanged = (not child.SCMConfig or child.SCMConfig ~= groupConfig) or (not child.SCMCooldownID or child.SCMCooldownID ~= cooldownID)
