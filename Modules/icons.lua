@@ -148,6 +148,7 @@ local function OnShow(child)
 				child.SCMFakeAuraInstanceID = true
 			elseif child.auraInstanceID then
 				child.SCMAuraInstanceID = child.SCMAuraInstanceID or child.auraInstanceID
+				child.SCMAuraDataUnit = child.SCMAuraDataUnit or child.auraDataUnit
 			end
 		end
 
@@ -158,11 +159,12 @@ end
 local function OnHide(child)
 	if child.SCMGroup and (child.SCMChanged or child.SCMBuffBar) then
 		if child.SCMBuffBar then
-			if child.SCMAuraInstanceID and not child.SCMFakeAuraInstanceID and C_UnitAuras.GetAuraDataByAuraInstanceID("player", child.SCMAuraInstanceID) then
+			if child.SCMAuraInstanceID and not child.SCMFakeAuraInstanceID and C_UnitAuras.GetAuraDataByAuraInstanceID(child.SCMAuraDataUnit, child.SCMAuraInstanceID) then
 				return
 			end
 
 			child.SCMAuraInstanceID = nil
+			child.SCMAuraDataUnit = nil
 			child.SCMFakeAuraInstanceID = nil
 		end
 
