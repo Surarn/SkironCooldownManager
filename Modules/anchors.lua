@@ -27,7 +27,7 @@ end
 function SCM:UpdateUUFValues(options, maxGroupWidth, rowConfig)
 	local offset = min((maxGroupWidth - 150), 0)
 	local mainAnchor = SCM:GetAnchor(1)
-	local height = floor(SCM:PixelPerfect(rowConfig[1].iconHeight or rowConfig[1].size) + 0.5)
+	local height = floor(SCM:PixelPerfect(rowConfig[1].iconHeight or rowConfig[1].size) + 0.5) + options.anchorsHeightOffset
 
 	if UUF_Player then
 		if options.anchorUUF and options.anchorUUFRoles[(select(5, Utils.GetSpec()))] then
@@ -38,9 +38,10 @@ function SCM:UpdateUUFValues(options, maxGroupWidth, rowConfig)
 			end
 			UUF_Player:ClearAllPoints()
 
-			mainAnchor.SetPoint(UUF_Player, "TOPRIGHT", mainAnchor, "TOPLEFT", offset - options.temporaryPadding, 0)
+			mainAnchor.SetPoint(UUF_Player, "TOPRIGHT", mainAnchor, "TOPLEFT", offset - options.temporaryPadding, options.anchorsYOffset)
 
 			UUF_Player.SCMOffset = offset - options.temporaryPadding
+			UUF_Player.SCMYOffset = options.anchorsYOffset
 			UUF_Player.SCMHeight = height
 			UUF_Player.SCMAnchor = mainAnchor
 			UUF_Player.SCMCustomAnchor = true
@@ -56,7 +57,7 @@ function SCM:UpdateUUFValues(options, maxGroupWidth, rowConfig)
 				UUF_Player.SCMHook = true
 				hooksecurefunc(UUF_Player, "SetPoint", function(self)
 					if options.anchorUUF and options.anchorUUFRoles and options.anchorUUFRoles[(select(5, Utils.GetSpec()))] then
-						self.SCMAnchor.SetPoint(self, "TOPRIGHT", self.SCMAnchor, "TOPLEFT", self.SCMOffset, 0)
+						self.SCMAnchor.SetPoint(self, "TOPRIGHT", self.SCMAnchor, "TOPLEFT", self.SCMOffset, self.SCMYOffset)
 						if options.adjustHeight then
 							self.SCMAnchor.SetHeight(self, self.SCMHeight)
 							self.SCMAnchor.SetHeight(UUF_Player_HealthBar, self.SCMHeight - 2)
@@ -101,9 +102,10 @@ function SCM:UpdateUUFValues(options, maxGroupWidth, rowConfig)
 			end
 
 			UUF_Target:ClearAllPoints()
-			mainAnchor.SetPoint(UUF_Target, "TOPLEFT", mainAnchor, "TOPRIGHT", -offset + options.temporaryPadding, 0)
+			mainAnchor.SetPoint(UUF_Target, "TOPLEFT", mainAnchor, "TOPRIGHT", -offset + options.temporaryPadding, options.anchorsYOffset)
 
 			UUF_Target.SCMOffset = -offset + options.temporaryPadding
+			UUF_Target.SCMYOffset = options.anchorsYOffset
 			UUF_Target.SCMHeight = height
 			UUF_Target.SCMAnchor = mainAnchor
 			UUF_Target.SCMCustomAnchor = true
@@ -118,7 +120,7 @@ function SCM:UpdateUUFValues(options, maxGroupWidth, rowConfig)
 				UUF_Target.SCMHook = true
 				hooksecurefunc(UUF_Target, "SetPoint", function(self)
 					if options.anchorUUF and options.anchorUUFRoles and options.anchorUUFRoles[(select(5, Utils.GetSpec()))] then
-						self.SCMAnchor.SetPoint(self, "TOPLEFT", self.SCMAnchor, "TOPRIGHT", self.SCMOffset, 0)
+						self.SCMAnchor.SetPoint(self, "TOPLEFT", self.SCMAnchor, "TOPRIGHT", self.SCMOffset, self.SCMYOffset)
 
 						if options.adjustHeight then
 							self.SCMAnchor.SetHeight(self, self.SCMHeight)
@@ -160,11 +162,11 @@ function SCM:UpdateUUFValues(options, maxGroupWidth, rowConfig)
 		if options.anchorElvUI then
 			if E.db.movers then
 				SCM.db.profile.options.elvUIAnchors["ElvUF_PlayerMover"] = SCM.db.profile.options.elvUIAnchors["ElvUF_PlayerMover"] or E.db.movers.ElvUF_PlayerMover
-				E.db.movers.ElvUF_PlayerMover = string.format("TOPRIGHT,%s,TOPLEFT,%d,%d", mainAnchor:GetName(), -offset - options.temporaryPadding, 0)
+				E.db.movers.ElvUF_PlayerMover = string.format("TOPRIGHT,%s,TOPLEFT,%d,%d", mainAnchor:GetName(), -offset - options.temporaryPadding, options.anchorsYOffset)
 				E:SetMoverPoints("ElvUF_PlayerMover")
 
 				SCM.db.profile.options.elvUIAnchors["ElvUF_TargetMover"] = SCM.db.profile.options.elvUIAnchors["ElvUF_TargetMover"] or E.db.movers.ElvUF_TargetMover
-				E.db.movers.ElvUF_TargetMover = string.format("TOPLEFT,%s,TOPRIGHT,%d,%d", mainAnchor:GetName(), offset + options.temporaryPadding, 0)
+				E.db.movers.ElvUF_TargetMover = string.format("TOPLEFT,%s,TOPRIGHT,%d,%d", mainAnchor:GetName(), offset + options.temporaryPadding, options.anchorsYOffset)
 				E:SetMoverPoints("ElvUF_TargetMover")
 			end
 
