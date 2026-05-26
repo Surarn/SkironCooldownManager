@@ -269,7 +269,7 @@ function SCM:ImportProfile(profileName, importString)
 	end
 
 	if typeID == EXPORT_TYPE_GLOBAL_ANCHORS then
-		self:ImportGlobalAnchorsFromData(data)
+		self:ImportGlobalAnchorsFromData(data, true)
 		return
 	end
 
@@ -362,7 +362,7 @@ function SCM:ImportGlobalAnchors(importString)
 	self:ImportProfile(nil, importString)
 end
 
-function SCM:ImportGlobalAnchorsFromData(data)
+function SCM:ImportGlobalAnchorsFromData(data, refreshData)
 	local previousAnchorCount = #self.db.profile.globalAnchorConfig
 	local anchors, customConfig = GetImportedGlobalAnchorData(data)
 
@@ -388,7 +388,9 @@ function SCM:ImportGlobalAnchorsFromData(data)
 		end
 	end
 
-	SCM.RefreshCooldownViewerData(true)
+	if refreshData then
+		SCM.RefreshCooldownViewerData(true)
+	end
 end
 
 function SCM:ImportGlobalSettingsFromData(data)
