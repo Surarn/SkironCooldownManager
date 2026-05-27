@@ -144,12 +144,8 @@ local function OnShow(child)
 	UIParent.SetAlpha(child, child.SCMHidden and 0 or 1)
 	if child.SCMGroup and (child.SCMChanged or child.SCMBuffBar) then
 		if child.SCMBuffBar then
-			if Constants.FakeAuras[child.SCMSpellID] then
-				child.SCMFakeAuraInstanceID = true
-
-				if child.SCMUseFixedDuration then
-					child.SCMFixedDuration = child.SCMFixedDuration or GetTime() + Constants.FakeAuras[child.SCMSpellID]
-				end
+			if child.SCMFakeAuraInstanceID and child.SCMUseFixedDuration then
+				child.SCMFixedDuration = GetTime() + Constants.FakeAuras[child.SCMSpellID]
 			elseif child.auraInstanceID then
 				child.SCMAuraInstanceID = child.SCMAuraInstanceID or child.auraInstanceID
 				child.SCMAuraDataUnit = child.SCMAuraDataUnit or child.auraDataUnit
@@ -174,7 +170,6 @@ local function OnHide(child)
 
 			child.SCMAuraInstanceID = nil
 			child.SCMAuraDataUnit = nil
-			child.SCMFakeAuraInstanceID = nil
 			child.SCMFixedDuration = nil
 		end
 
@@ -224,11 +219,13 @@ function Icons.SetupBuffBarHooks(child)
 		child:HookScript("OnShow", OnShow)
 		child:HookScript("OnHide", OnHide)
 
+		child.SCMFakeAuraInstanceID = true
 		child.SCMUseFixedDuration = type(Constants.FakeAuras[child.SCMSpellID]) == "number"
 	else
 		child:HookScript("OnShow", OnShow)
 		hooksecurefunc(child, "OnAuraInstanceInfoCleared", OnHide)
 
+		child.SCMFakeAuraInstanceID = nil
 		child.SCMUseFixedDuration = nil
 	end
 end

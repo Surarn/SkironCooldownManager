@@ -25,7 +25,6 @@ local CHILD_SCM_RESET_FIELDS = {
 	"SCMCustom",
 	"SCMIconType",
 	"SCMIconTexture",
-	"SCMFakeAuraInstanceID",
 	"SCMGlowWhileActive",
 	"SCMPandemic",
 	"SCMRowConfig",
