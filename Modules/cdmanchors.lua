@@ -243,21 +243,21 @@ end
 
 local function OnChildSetSize(child)
 	local anchorFrame = child.SCMAnchorFrame
-	if anchorFrame then
+	if anchorFrame and child.SCMHeight and child.SCMWidth then
 		anchorFrame.SetSize(child, child.SCMWidth, child.SCMHeight)
 	end
 end
 
 local function OnChildSetWidth(child)
 	local anchorFrame = child.SCMAnchorFrame
-	if anchorFrame then
+	if anchorFrame and child.SCMWidth then
 		anchorFrame.SetWidth(child, child.SCMWidth)
 	end
 end
 
 local function OnChildSetHeight(child)
 	local anchorFrame = child.SCMAnchorFrame
-	if anchorFrame then
+	if anchorFrame and child.SCMHeight then
 		anchorFrame.SetHeight(child, child.SCMHeight)
 	end
 end
