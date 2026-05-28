@@ -554,6 +554,7 @@ Constants.FakeAuras = {
 	-- [373276] = 24, -- Idol of Yogg-Saron
 	[451234] = true, -- Voidwrath 6
 	[34433] = true, -- Shadowfiend 6
+	[1280137] = true, -- Mindbender 12
 
 	-- SHAMAN
 	[5394] = true, -- Healing Stream Totem 15
