@@ -16,35 +16,6 @@ SCM.CustomAnchors = {}
 SCM.CustomEntries = {}
 SCM.Templates = {}
 
-local function OnEssentialCooldownViewerLayout(viewer)
-	-- SCM:InvalidateViewerChildrenCache(viewer)
-	-- SCM:InvalidateViewerChildrenCache(UtilityCooldownViewer)
-	SCM:ApplyEssentialCDManagerConfig()
-end
-
-local function OnUtilityCooldownViewerLayout(viewer)
-	-- SCM:InvalidateViewerChildrenCache(viewer)
-	-- SCM:InvalidateViewerChildrenCache(EssentialCooldownViewer)
-	SCM:ApplyUtilityCDManagerConfig()
-end
-
-local function OnBuffCooldownViewerLayout(viewer)
-	SCM:InvalidateViewerChildrenCache(viewer)
-	SCM:ApplyBuffIconCDManagerConfig()
-end
-
-local function OnBuffBarViewerLayout(viewer)
-	SCM:InvalidateViewerChildrenCache(viewer)
-	SCM:ApplyBuffBarCDManagerConfig()
-end
-
-local function OnCooldownViewerSettingsRefreshLayout(self)
-	SCM:ClearChildrenCache()
-	SCM:UpdateCooldownInfo(true)
-	SCM:UpdateDB()
-	SCM:ApplyAllCDManagerConfigs()
-end
-
 local pendingCustomGlowChildren = {}
 local function OnSpellAlertManagerShowAlert(_, child)
 	local options = SCM.db.profile.options
@@ -99,6 +70,28 @@ local function RefreshCooldownViewerData(releaseCustomIcons)
 	SCM:RefreshResourceBarConfig()
 end
 SCM.RefreshCooldownViewerData = RefreshCooldownViewerData
+
+local function OnEssentialCooldownViewerLayout()
+	SCM:ApplyEssentialCDManagerConfig()
+end
+
+local function OnUtilityCooldownViewerLayout()
+	SCM:ApplyUtilityCDManagerConfig()
+end
+
+local function OnBuffCooldownViewerLayout(viewer)
+	SCM:InvalidateViewerChildrenCache(viewer)
+	SCM:ApplyBuffIconCDManagerConfig()
+end
+
+local function OnBuffBarViewerLayout(viewer)
+	SCM:InvalidateViewerChildrenCache(viewer)
+	SCM:ApplyBuffBarCDManagerConfig()
+end
+
+local function OnCooldownViewerSettingsRefreshLayout()
+	RefreshCooldownViewerData(true)
+end
 
 function SCM:SetHooks()
 	hooksecurefunc(EssentialCooldownViewer, "RefreshLayout", OnEssentialCooldownViewerLayout)
