@@ -878,7 +878,7 @@ local function CreateCustomIcon(id, config, isGlobal, skipExisting)
 			return
 		end
 
-		if DoesItemOrSpellExists(config) and ShouldLoadCustomIcon(config) then
+		if DoesItemOrSpellExists(config) and (not isGlobal or ShouldLoadCustomIcon(config)) then
 			local frame = AcquireCustomIconFrame(customFrames, id)
 			ConfigureCustomIconFrame(frame, id, config, 1, config.anchorGroup or 1, isGlobal)
 			UpdateCustomIconFrameState(frame, config)
@@ -941,8 +941,8 @@ local function ProcessCustomIcon(id, config, validChildren)
 		return
 	end
 
-	if customFrames[id] and DoesItemOrSpellExists(config) and ShouldLoadCustomIcon(config) then
-		local frame = customFrames[id]
+	local frame = customFrames[id]
+	if frame and DoesItemOrSpellExists(config) and (not frame.SCMGlobal or ShouldLoadCustomIcon(config)) then
 		local iconType = frame.SCMIconType
 		if iconType == "empty" then
 			Icons.SetChildVisibilityState(frame, true, true)
