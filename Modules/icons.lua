@@ -370,8 +370,7 @@ end
 local function ProcessRegularIcon(child, childData, options)
 	Icons.SetupRegularIconHooks(child)
 
-	-- and not (child.showWhileActive and child.Cooldown and not child.Cooldown:GetUseAuraDisplayTime())
-	local shouldShow = not (childData.hideWhenNotOnCooldown and not Cooldowns.IsChildOnCooldown(child)) 
+	local shouldShow = not (childData.hideWhenNotOnCooldown and not Cooldowns.IsChildOnCooldown(child))
 	local applyNow = shouldShow and child.SCMHidden and not child.SCMLayoutLimited
 	child.SCMChanged = child.SCMChanged or applyNow
 	Icons.SetChildVisibilityState(child, shouldShow, applyNow)
@@ -440,9 +439,6 @@ local function ProcessSingleChild(child, validChildren, categoryIndex, isBuffIco
 	end
 
 	AddChildToGroup(validChildren, group, child)
-	if activeScopedAnchorGroups and not activeScopedAnchorGroups[group] then
-		return
-	end
 
 	child.SCMChanged = child.SCMChanged or (not child.SCMConfig or child.SCMConfig ~= groupConfig) or (not child.SCMCooldownID or child.SCMCooldownID ~= cooldownID)
 	child.SCMConfig = groupConfig
@@ -450,6 +446,10 @@ local function ProcessSingleChild(child, validChildren, categoryIndex, isBuffIco
 	child.SCMCooldownID = cooldownID
 	child.SCMConfigID = configID
 	child.SCMGroup = group
+
+	if activeScopedAnchorGroups and not activeScopedAnchorGroups[group] then
+		return
+	end
 
 	if isBuffIcon then
 		ProcessBuffIcon(child, groupConfig, options)
@@ -502,9 +502,6 @@ local function ProcessSingleBuffBarChild(child, validChildren, categoryIndex, op
 	end
 
 	AddChildToGroup(validChildren, group, child)
-	if activeScopedAnchorGroups and not activeScopedAnchorGroups[group] then
-		return
-	end
 
 	child.SCMChanged = child.SCMChanged or (not child.SCMConfig or child.SCMConfig ~= groupConfig) or (not child.SCMCooldownID or child.SCMCooldownID ~= cooldownID)
 	child.SCMConfig = groupConfig
@@ -513,6 +510,10 @@ local function ProcessSingleBuffBarChild(child, validChildren, categoryIndex, op
 	child.SCMConfigID = configID
 	child.SCMGroup = group
 	child.SCMBuffBar = true
+
+	if activeScopedAnchorGroups and not activeScopedAnchorGroups[group] then
+		return
+	end
 
 	ProcessBuffBar(child, groupConfig, options)
 end
