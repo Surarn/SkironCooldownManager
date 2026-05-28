@@ -618,7 +618,7 @@ local function ShouldLoadCustomIcon(config)
 
 	if config.useSpellKnown or config.useSpellKnown == nil then
 		if not config.spellKnownSpellID or type(config.spellKnownSpellID) ~= "number" then
-			return false
+			return true
 		end
 
 		local isSpellKnown = C_SpellBook.IsSpellKnown(config.spellKnownSpellID)
