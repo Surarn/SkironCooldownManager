@@ -524,6 +524,22 @@ function CustomIcons.UpdateSpellGlow(spellID, event)
 	end
 end
 
+function CustomIcons.UpdateItemCountForItemID(itemID)
+	local entriesByItemID = Cache.cachedCustomItemEntriesByItemID[itemID]
+
+	if not entriesByItemID then
+		return
+	end
+
+	for i = 1, #entriesByItemID do
+		local entry = entriesByItemID[i]
+		local frame = CustomItemFrames[entry.id]
+		if frame and not frame.SCMReleased then
+			SetCustomIconCountText(frame, frame.SCMIconType, entry.config)
+		end
+	end
+end
+
 local function DoesItemOrSpellExists(config)
 	local iconType = GetIconType(config)
 	if iconType == "empty" then

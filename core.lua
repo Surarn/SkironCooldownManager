@@ -140,6 +140,15 @@ function SCM:BAG_UPDATE_DELAYED()
 	end
 end
 
+function SCM:ACTIONBAR_SLOT_CHANGED(actionSlot)
+	local actionType, itemID = GetActionInfo(actionSlot)
+	if actionType ~= "item" or not itemID then
+		return
+	end
+
+	SCM.CustomIcons.UpdateItemCountForItemID(itemID)
+end
+
 function SCM:UNIT_SPELLCAST_SUCCEEDED(_, _, spellID)
 	SCM:ApplySuccessfulCastBySpellID(spellID)
 end
@@ -354,6 +363,7 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 	eventFrame:RegisterEvent("EDIT_MODE_LAYOUTS_UPDATED")
 	eventFrame:RegisterEvent("UI_SCALE_CHANGED")
 	eventFrame:RegisterEvent("DISPLAY_SIZE_CHANGED")
+	eventFrame:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
 	eventFrame:RegisterEvent("CVAR_UPDATE")
 	eventFrame:RegisterEvent("SPELL_DATA_LOAD_RESULT")
 	eventFrame:RegisterEvent("ITEM_DATA_LOAD_RESULT")
