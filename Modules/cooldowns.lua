@@ -27,7 +27,7 @@ local function OnBuffCooldownSet(self)
 		return
 	end
 
-	if parent.auraInstanceID and (not parent.SCMAuraInstanceID or parent.auraInstanceID ~= parent.SCMAuraInstanceID) then
+	if parent.auraInstanceID and (not parent.SCMAuraInstanceID or parent.auraInstanceID ~= parent.SCMAuraInstanceID) and parent.auraDataUnit == "player" then
 		parent.SCMAuraInstanceID = parent.auraInstanceID
 		parent.SCMAuraDataUnit = parent.auraDataUnit or parent.SCMAuraDataunit
 	elseif parent.SCMUseFixedDuration then

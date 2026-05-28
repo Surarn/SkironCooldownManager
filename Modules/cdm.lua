@@ -246,10 +246,12 @@ local function LayoutAnchorGroup(group, visibleChildren, anchorConfig, options, 
 	local visibleChildCount = #visibleChildren
 	local configuredChildCount = configuredChildren and #configuredChildren or 0
 	local layoutSignature = visibleChildCount
+	local hasChangedChild = false
 
 	table.sort(visibleChildren, SortBySCMOrder)
 	for index = 1, visibleChildCount do
 		local child = visibleChildren[index]
+		hasChangedChild = hasChangedChild or child.SCMChanged
 		local cooldownID = child.SCMCooldownID
 		local cooldownSignature = tonumber(cooldownID) or 0
 		if cooldownSignature == 0 and cooldownID then
@@ -274,7 +276,7 @@ local function LayoutAnchorGroup(group, visibleChildren, anchorConfig, options, 
 	totalChildren = layoutChildCount
 	layoutSignature = layoutSignature + (configuredChildCount * 31) + (layoutChildCount * 131) + (lockGroupSize and 8191 or 0)
 
-	if allowLayoutSkip and not checkDuplicates and not resetSize and not SCM.isOptionsOpen and state.layoutSignature == layoutSignature then
+	if allowLayoutSkip and not hasChangedChild and not checkDuplicates and not resetSize and not SCM.isOptionsOpen and state.layoutSignature == layoutSignature then
 		return
 	end
 
@@ -457,6 +459,7 @@ local function LayoutAnchorGroup(group, visibleChildren, anchorConfig, options, 
 			else
 				SCM:SkinBuffBar(child, child.SCMConfig)
 			end
+			child.SCMChanged = false
 
 			if checkDuplicates then
 				local duplicateChild = child.SCMLayoutNextDuplicate
@@ -479,6 +482,7 @@ local function LayoutAnchorGroup(group, visibleChildren, anchorConfig, options, 
 					else
 						SCM:SkinBuffBar(child, child.SCMConfig)
 					end
+					child.SCMChanged = false
 
 					duplicateChild = child.SCMLayoutNextDuplicate
 					child.SCMLayoutNextDuplicate = nil
