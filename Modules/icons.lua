@@ -329,6 +329,8 @@ function Icons.ExpandScopedAnchorGroups(viewer, viewerData, scopedAnchorGroups)
 						scopedAnchorGroups[oldGroup] = true
 					end
 				elseif oldCooldownID ~= cooldownID or oldGroup ~= group then
+					child.SCMCooldownID = nil
+					
 					if oldGroup then
 						Cache.cachedAnchorStates[oldGroup].layoutSignature = nil
 						scopedAnchorGroups[oldGroup] = true
@@ -403,15 +405,13 @@ local function ProcessSingleChild(child, validChildren, categoryIndex, isBuffIco
 	end
 
 	local activeScopedAnchorGroups = Cache.activeScopedAnchorGroups
-	local cooldownID = child:GetCooldownID()
+	local cooldownID = child:GetCooldownID() or hild.SCMCooldownID
 	local categoryConfig = categoryIndex and SCM.defaultCooldownViewerConfig[categoryIndex]
 	local info = categoryConfig and (categoryConfig[cooldownID] or SCM.defaultCooldownViewerConfig.cooldownIDs[cooldownID])
 	local spellID = info and (info.overrideSpellID or info.spellID)
 	if info and info.linkedSpellIDs and #info.linkedSpellIDs == 1 then
 		child.SCMLinkedSpellID = info.linkedSpellIDs[1]
 	end
-
-	child.SCMSpellID = spellID
 
 	local configID, childData = GetSpellConfigByCooldownID(SCM.spellConfig, cooldownID)
 	if not (cooldownID and spellID and childData) then
@@ -424,6 +424,8 @@ local function ProcessSingleChild(child, validChildren, categoryIndex, isBuffIco
 		end
 		return
 	end
+
+	child.SCMSpellID = spellID
 
 	local group = GetConfiguredGroupForCategory(childData, categoryIndex)
 	local groupConfig = childData.anchorGroup and childData.anchorGroup[group]
@@ -447,7 +449,7 @@ local function ProcessSingleChild(child, validChildren, categoryIndex, isBuffIco
 	child.SCMConfigID = configID
 	child.SCMGroup = group
 
-	if activeScopedAnchorGroups and not activeScopedAnchorGroups[group] then
+	if activeScopedAnchorGroups and not activeScopedAnchorGroups[group] and (child.SCMBuffOptions or child.SCMIconOptions) then
 		return
 	end
 
