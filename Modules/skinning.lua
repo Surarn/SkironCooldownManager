@@ -20,6 +20,14 @@ local function ApplyChargeAndApplicationStyle(child, options, fontPath)
 
 		if fontPath then
 			child.ChargeCount.Current:SetFont(fontPath, size, outline)
+			child.ChargeCount.Current:SetWordWrap(false)
+			child.ChargeCount.Current:SetNonSpaceWrap(false)
+			child.ChargeCount.Current:SetMaxLines(1)
+
+			local width = child.ChargeCount.Current:GetStringWidth()
+			if not issecretvalue(width) then
+				child.ChargeCount:SetWidth(width)
+			end
 		end
 
 		child.ChargeCount.Current:ClearAllPoints()
@@ -57,6 +65,14 @@ local function ApplyChargeAndApplicationStyle(child, options, fontPath)
 		local outline = rowConfig.applicationsFontOutline or options.chargeFontOutline or "OUTLINE"
 		if fontPath then
 			child.Applications.Applications:SetFont(fontPath, size, outline)
+			child.Applications.Applications:SetWordWrap(false)
+			child.Applications.Applications:SetNonSpaceWrap(false)
+			child.Applications.Applications:SetMaxLines(1)
+
+			local width = child.Applications.Applications:GetStringWidth()
+			if not issecretvalue(width) then
+				child.Applications:SetWidth(width)
+			end
 		end
 
 		child.Applications.Applications:ClearAllPoints()
@@ -424,12 +440,8 @@ function SCM:SkinBuffBar(child, config)
 		if iconFrame.Applications then
 			local applications = iconFrame.Applications
 			applications:SetWordWrap(false)
-			if applications.SetNonSpaceWrap then
-				applications:SetNonSpaceWrap(false)
-			end
-			if applications.SetMaxLines then
-				applications:SetMaxLines(1)
-			end
+			applications:SetNonSpaceWrap(false)
+			applications:SetMaxLines(1)
 
 			local size = rowConfig.applicationsFontSize or options.chargeFontSize
 			local outline = rowConfig.applicationsFontOutline or options.chargeFontOutline or "OUTLINE"
