@@ -50,7 +50,7 @@ end
 local function OnChildSetPoint(child)
 	if child.SCMSetPoint then return end
 
-	local cooldownID = not child.SCMCustom and child:GetCooldownID()
+	local cooldownID = not child.SCMCustom and (child:GetCooldownID() or child.SCMCooldownID)
 	local anchorData = cooldownID and anchorDataByCooldownID[cooldownID] or not cooldownID and child.SCMAnchorData
 	local anchorFrame = anchorData and anchorData[2]
 	if not anchorFrame or not anchorData then
