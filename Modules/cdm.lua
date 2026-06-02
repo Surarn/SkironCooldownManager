@@ -234,7 +234,59 @@ local function LayoutManagedAnchorChild(child, row, anchorConfig, childAnchor, s
 	child.SCMChanged = false
 end
 
-local function LayoutAnchorGroup(group, visibleChildren, anchorConfig, options, changedGroups, resetSize, checkDuplicates, allowLayoutSkip)
+local function CollapseDuplicateChildren(layoutChildren, layoutChildCount)
+	local uniqueChildren = Cache.cachedLayoutChildren
+	local seenCooldownIDs = Cache.cachedLayoutCooldownIDs
+	local hasDuplicateChildren = false
+	local totalChildren = 0
+
+	if not uniqueChildren then
+		uniqueChildren = {}
+		Cache.cachedLayoutChildren = uniqueChildren
+	else
+		wipe(uniqueChildren)
+	end
+	if not seenCooldownIDs then
+		seenCooldownIDs = {}
+		Cache.cachedLayoutCooldownIDs = seenCooldownIDs
+	else
+		wipe(seenCooldownIDs)
+	end
+
+	for index = 1, layoutChildCount do
+		local child = layoutChildren[index]
+		local cooldownID = child.SCMCooldownID
+		child.SCMLayoutNextDuplicate = nil
+
+		if cooldownID then
+			local masterChild = seenCooldownIDs[cooldownID]
+			if masterChild then
+				hasDuplicateChildren = true
+				if masterChild ~= child then
+					child.SCMLayoutNextDuplicate = masterChild.SCMLayoutNextDuplicate
+					masterChild.SCMLayoutNextDuplicate = child
+				end
+			else
+				seenCooldownIDs[cooldownID] = child
+				totalChildren = totalChildren + 1
+				uniqueChildren[totalChildren] = child
+			end
+		else
+			totalChildren = totalChildren + 1
+			uniqueChildren[totalChildren] = child
+		end
+	end
+
+	wipe(seenCooldownIDs)
+	if hasDuplicateChildren then
+		return uniqueChildren, totalChildren
+	end
+
+	wipe(uniqueChildren)
+	return layoutChildren, layoutChildCount
+end
+
+local function LayoutAnchorGroup(group, visibleChildren, anchorConfig, options, changedGroups, resetSize, allowLayoutSkip)
 	Cache.cachedVisitedAnchorGroups[group] = true
 
 	local state = GetAnchorState(group)
@@ -273,18 +325,15 @@ local function LayoutAnchorGroup(group, visibleChildren, anchorConfig, options, 
 	local scaleData = anchorConfig and anchorConfig.advancedScale
 	local configuredChildren = Cache.cachedChildrenTbl[group]
 	local layoutChildCount
-	local uniqueChildren
 	local visibleChildCount = #visibleChildren
 	local configuredChildCount = configuredChildren and #configuredChildren or 0
 	local layoutSignature = visibleChildCount
 	local hasChangedChild = false
-	local hasLinkedDuplicate = false
 
 	table.sort(visibleChildren, SortBySCMOrder)
 	for index = 1, visibleChildCount do
 		local child = visibleChildren[index]
 		hasChangedChild = hasChangedChild or child.SCMChanged
-		hasLinkedDuplicate = hasLinkedDuplicate or child.SCMLayoutNextDuplicate
 		local cooldownID = child.SCMCooldownID
 		local cooldownSignature = tonumber(cooldownID) or 0
 		if cooldownSignature == 0 and cooldownID then
@@ -302,65 +351,19 @@ local function LayoutAnchorGroup(group, visibleChildren, anchorConfig, options, 
 	end
 
 	Cache.cachedAnchorChildren[group] = visibleChildren
-	checkDuplicates = checkDuplicates and state.visibleChildCount ~= visibleChildCount
 	state.visibleChildCount = visibleChildCount
 
 	layoutChildCount = #layoutChildren
-	totalChildren = layoutChildCount
 	layoutSignature = layoutSignature + (configuredChildCount * 31) + (layoutChildCount * 131) + (lockGroupSize and 8191 or 0)
 
-	if allowLayoutSkip and not hasChangedChild and not checkDuplicates and not resetSize and not SCM.isOptionsOpen and state.layoutSignature == layoutSignature then
+	if allowLayoutSkip and not hasChangedChild and not resetSize and not SCM.isOptionsOpen and state.layoutSignature == layoutSignature then
 		return
 	end
 
 	state.layoutSignature = layoutSignature
 
-	if checkDuplicates or hasLinkedDuplicate then
-		uniqueChildren = Cache.cachedLayoutChildren
-		local seenCooldownIDs = Cache.cachedLayoutCooldownIDs
-		local hasDuplicateChildren = false
-		if not uniqueChildren then
-			uniqueChildren = {}
-			Cache.cachedLayoutChildren = uniqueChildren
-		else
-			wipe(uniqueChildren)
-		end
-		if not seenCooldownIDs then
-			seenCooldownIDs = {}
-			Cache.cachedLayoutCooldownIDs = seenCooldownIDs
-		else
-			wipe(seenCooldownIDs)
-		end
-
-		totalChildren = 0
-		for index = 1, layoutChildCount do
-			local child = layoutChildren[index]
-			local cooldownID = child.SCMCooldownID
-			child.SCMLayoutNextDuplicate = nil
-
-			if cooldownID then
-				local masterChild = seenCooldownIDs[cooldownID]
-				if masterChild then
-					if masterChild ~= child then
-						hasDuplicateChildren = true
-						child.SCMLayoutNextDuplicate = masterChild.SCMLayoutNextDuplicate
-						masterChild.SCMLayoutNextDuplicate = child
-					end
-				else
-					seenCooldownIDs[cooldownID] = child
-					totalChildren = totalChildren + 1
-					uniqueChildren[totalChildren] = child
-				end
-			else
-				totalChildren = totalChildren + 1
-				uniqueChildren[totalChildren] = child
-			end
-		end
-		wipe(seenCooldownIDs)
-		checkDuplicates = hasDuplicateChildren
-		layoutChildren = uniqueChildren
-		layoutChildCount = totalChildren
-	end
+	layoutChildren, layoutChildCount = CollapseDuplicateChildren(layoutChildren, layoutChildCount)
+	totalChildren = layoutChildCount
 	local hardLimitChildCount = lockGroupSize and layoutChildCount or visibleChildCount
 
 	while childIndex <= totalChildren do
@@ -548,8 +551,9 @@ local function LayoutAnchorGroup(group, visibleChildren, anchorConfig, options, 
 	if boundsChanged and changedGroups then
 		changedGroups[group] = true
 	end
-	if uniqueChildren then
-		wipe(uniqueChildren)
+
+	if layoutChildren == Cache.cachedLayoutChildren then
+		wipe(layoutChildren)
 	end
 end
 
@@ -688,7 +692,7 @@ local function OrderCDManagerSpells_Actual(updateScope, scopedAnchorGroupsOverri
 	local allowLayoutSkip = scopedAnchorGroups and updateScope ~= UPDATE_SCOPE.BUFF_BAR
 	wipe(Cache.cachedVisitedAnchorGroups)
 	for group, visibleChildren in pairs(Cache.cachedCooldownFrameTbl) do
-		LayoutAnchorGroup(group, visibleChildren, Utils.GetAnchorConfigForLayoutGroup(config, group), options, changedGroups, nil, updateScope == UPDATE_SCOPE.BUFF, allowLayoutSkip)
+		LayoutAnchorGroup(group, visibleChildren, Utils.GetAnchorConfigForLayoutGroup(config, group), options, changedGroups, nil, allowLayoutSkip)
 	end
 
 	if not isFullBuffBarUpdate then
