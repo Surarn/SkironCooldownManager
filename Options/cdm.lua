@@ -1820,7 +1820,7 @@ local function SelectAnchor(widget, parentWidget, anchorIndex, anchorTabsTbl, mo
 									iconSettingsTabs:AddChild(customGlowColor)
 								end
 
-								if buttonData.iconType == "spell" or buttonData.iconType == "timer" then
+								if buttonData.iconType == "spell" or buttonData.iconType == "timer" or buttonData.iconType == "bloodlust" then
 									local glowWhileActive = AceGUI:Create("CheckBox")
 									glowWhileActive:SetLabel("Glow While Active")
 									glowWhileActive:SetRelativeWidth(0.5)
