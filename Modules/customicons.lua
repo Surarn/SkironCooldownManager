@@ -42,6 +42,15 @@ local function OnBloodlustUnitAura(_, _, unit, updateInfo)
 	end
 end
 
+local function UpdateBloodlustTimerEvent()
+	if #BloodlustTimerEntries > 0 then
+		if not BloodlustTimerEventFrame then BloodlustTimerEventFrame = CreateFrame("Frame") BloodlustTimerEventFrame:SetScript("OnEvent", OnBloodlustUnitAura) end
+		BloodlustTimerEventFrame:RegisterUnitEvent("UNIT_AURA", "player")
+	elseif BloodlustTimerEventFrame then
+		BloodlustTimerEventFrame:UnregisterEvent("UNIT_AURA")
+	end
+end
+
 function CustomIcons.GetCustomIconFrames(config)
 	local iconType = GetIconType(config)
 	if not iconType then
