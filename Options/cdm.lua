@@ -1414,6 +1414,7 @@ local function SelectAnchor(widget, parentWidget, anchorIndex, anchorTabsTbl, mo
 					end
 
 					buttonFrame:SetBackdropBorderColor(0, 1, 0, 1)
+					if buttonData.iconType == "bloodlust" then iconSettings:SetTitle("Bloodlust") end
 
 					if buttonConfig then
 						local function ApplyIconConfigUpdate()
