@@ -884,6 +884,7 @@ local function RebuildCustomIconLoadCache()
 	wipe(Cache.cachedCustomSpellEntriesBySpellID)
 	wipe(Cache.cachedCustomItemEntriesByItemID)
 	wipe(Cache.cachedCustomSlotEntriesByItemID)
+	wipe(BloodlustTimerEntries)
 	for _, entries in pairs(Cache.cachedCustomIconsByGroup) do
 		wipe(entries)
 	end
@@ -905,6 +906,9 @@ local function RebuildCustomIconLoadCache()
 			groupEntries[#groupEntries + 1] = config
 			CacheCustomIconEntry(id, config, isGlobal, slotItemID)
 			RequestCustomIconDataLoad(config, requestedSpellIDs, requestedItemIDs, slotItemID)
+			if GetIconType(config) == "bloodlust" then
+				BloodlustTimerEntries[#BloodlustTimerEntries + 1] = id
+			end
 		end
 	end
 
