@@ -11,8 +11,36 @@ local ToGlobalGroup = Utils.ToGlobalGroup
 
 local CustomItemFrames = {}
 local CustomSpellFrames = {}
+local BloodlustTimerEntries = {}
 local CustomIconFramePool
 local ShouldShowCustomIcon
+local BloodlustTimerEventFrame
+
+local function TriggerBloodlustTimers()
+	for i = 1, #BloodlustTimerEntries do
+		local frame = CustomSpellFrames[BloodlustTimerEntries[i]]
+		if frame and not frame.SCMReleased then
+			frame.lastCastStartTime = GetTime()
+			SCM:ApplyAnchorGroupCDManagerConfig(frame.SCMGroup, frame.SCMGlobal)
+		end
+	end
+end
+
+local function OnBloodlustUnitAura(_, _, unit, updateInfo)
+	if unit ~= "player" or not updateInfo or not updateInfo.addedAuras then
+		return
+	end
+
+	for _, auraInfo in pairs(updateInfo.addedAuras) do
+		if auraInfo and auraInfo.auraInstanceID then
+			local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID("player", auraInfo.auraInstanceID)
+			if auraData and auraData.spellId and not issecretvalue(auraData.spellId) and SCM.Constants.SatedDebuffs[auraData.spellId] then
+				TriggerBloodlustTimers()
+				return
+			end
+		end
+	end
+end
 
 function CustomIcons.GetCustomIconFrames(config)
 	local iconType = GetIconType(config)
