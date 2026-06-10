@@ -23,6 +23,7 @@ local function ApplyHideChildNow(child)
 	child:EnableMouse(false)
 	child.SCMOnEnter = child.SCMOnEnter or child:GetScript("OnEnter")
 	child:SetScript("OnEnter", nil)
+	SCM:StopCustomGlow(child)
 
 	if not child.SCMAlphaHook then
 		child.SCMAlphaHook = true
@@ -119,7 +120,7 @@ end
 function Icons.UpdateChildGlow(child, isInactive)
 	if child.SCMConfig then
 		if child.SCMConfig.glowWhileActive then
-			if not isInactive then
+			if not isInactive and child.SCMShouldBeVisible then
 				SCM:StartCustomGlow(child)
 				return
 			end
@@ -128,7 +129,7 @@ function Icons.UpdateChildGlow(child, isInactive)
 				SCM:StopCustomGlow(child)
 			end
 		elseif child.SCMConfig.glowWhileInactive then
-			if isInactive then
+			if isInactive and child.SCMShouldBeVisible then
 				SCM:StartCustomGlow(child)
 				return
 			end
@@ -330,7 +331,7 @@ function Icons.ExpandScopedAnchorGroups(viewer, viewerData, scopedAnchorGroups)
 					end
 				elseif oldCooldownID ~= cooldownID or oldGroup ~= group then
 					child.SCMCooldownID = nil
-					
+
 					if oldGroup then
 						Cache.cachedAnchorStates[oldGroup].layoutSignature = nil
 						scopedAnchorGroups[oldGroup] = true
