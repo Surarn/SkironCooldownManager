@@ -375,7 +375,7 @@ local function ProcessRegularIcon(child, childData, options)
 	Icons.SetupRegularIconHooks(child)
 
 	local shouldShow = not (childData.hideWhenNotOnCooldown and not Cooldowns.GetChildCooldown(child))
-	local applyNow = shouldShow and child.SCMHidden and not child.SCMLayoutLimited
+	local applyNow = child.SCMShouldBeVisible ~= shouldShow
 	child.SCMChanged = child.SCMChanged or applyNow
 	Icons.SetChildVisibilityState(child, shouldShow, applyNow)
 	child.SCMIconOptions = options
