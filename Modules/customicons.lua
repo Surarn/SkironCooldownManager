@@ -130,7 +130,7 @@ local function GetCustomIconFramePool()
 end
 
 local function OnIconCooldownDone(self)
-	local parent = self:GetParent()
+	local parent = self.SCMParent or self:GetParent()
 	if not parent or parent.SCMReleased or not parent.SCMConfig then
 		return
 	end

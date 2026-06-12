@@ -1543,6 +1543,16 @@ local function SelectAnchor(widget, parentWidget, anchorIndex, anchorTabsTbl, mo
 										end)
 										iconSettingsTabs:AddChild(hideWhileReady)
 
+										local expCooldownThing = AceGUI:Create("CheckBox")
+										expCooldownThing:SetLabel("Experimental Cooldown Anchoring")
+										expCooldownThing:SetRelativeWidth(0.5)
+										expCooldownThing:SetValue(buttonConfig.expCooldownThing)
+										expCooldownThing:SetCallback("OnValueChanged", function(self, event, value)
+											buttonConfig.expCooldownThing = value or nil
+											ApplyIconConfigUpdate()
+										end)
+										iconSettingsTabs:AddChild(expCooldownThing)
+
 										if buttonData.isCustom then
 											local showGCD = AceGUI:Create("CheckBox")
 											showGCD:SetLabel("Show GCD")
