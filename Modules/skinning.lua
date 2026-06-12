@@ -186,9 +186,9 @@ local function ApplyCooldownStyle(child, options)
 			child.CooldownFlash:SetAlpha(0)
 		end
 
-		child.Cooldown:ClearAllPoints()
-		child.Cooldown:SetAllPoints()
-		cooldownFrame:SetPoint("BOTTOMRIGHT", child, "BOTTOMRIGHT", -SCM:PixelPerfect(), SCM:PixelPerfect())
+		cooldownFrame:ClearAllPoints()
+		cooldownFrame:SetPoint("TOPLEFT", child, "TOPLEFT", -5, 5)
+		cooldownFrame:SetPoint("BOTTOMRIGHT", child, "BOTTOMRIGHT", 5, -5)
 		cooldownFrame:SetSwipeTexture("Interface\\Buttons\\WHITE8x8")
 
 		hooksecurefunc(cooldownFrame, "SetCooldown", OnSetCooldown)
@@ -243,6 +243,7 @@ function SCM:SkinChild(child, childConfig)
 
 	if not child.SCMSkinned or (child.SCMSkinned and self.OptionsFrame ~= nil and self.OptionsFrame:IsShown()) then
 		child.SCMSkinned = true
+		child:SetClipsChildren(true)
 
 		child.customBorder = child.customBorder or CreateFrame("Frame", nil, child, "BackdropTemplate")
 		child.customBorder:SetFrameLevel(child:GetFrameLevel() + 1)
