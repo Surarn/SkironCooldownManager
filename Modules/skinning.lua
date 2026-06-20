@@ -83,7 +83,7 @@ local function ApplyChargeAndApplicationStyle(child, options, fontPath)
 			rowConfig.applicationsXOffset or options.chargeXOffset,
 			rowConfig.applicationsYOffset or options.chargeYOffset
 		)
-		child.Applications:SetFrameLevel(4)
+		child.Applications:SetFrameLevel(5)
 	end
 end
 
