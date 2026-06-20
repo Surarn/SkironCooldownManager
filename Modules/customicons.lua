@@ -580,7 +580,11 @@ local function DoesItemOrSpellExists(config)
 		return true
 	end
 
-	if iconType == "spell" or iconType == "timer" or iconType == "bloodlust" then
+	if iconType == "spell" then
+		return config.spellID and C_SpellBook.IsSpellInSpellBook(config.spellID)
+	end
+
+	if iconType == "timer" or iconType == "bloodlust" then
 		return config.spellID and C_Spell.DoesSpellExist(config.spellID)
 	end
 
